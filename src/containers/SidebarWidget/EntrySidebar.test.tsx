@@ -19,5 +19,5 @@ test("EntrySidebar component", async () => {
     ),
   });
 
-  expect(screen.getByText(/Sidebar Widget/)).toBeInTheDocument();
+  expect(screen.getAllByTitle(/Entry Sidebar Widget/)[0]).toBeInTheDocument();
 });

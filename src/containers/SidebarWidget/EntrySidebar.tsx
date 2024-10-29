@@ -33,7 +33,7 @@ const EntrySidebarExtension = () => {
           <div className="ui-container">
             <div className="logo-container">
               <img src={Icon} alt="Logo" />
-              <p>{localeTexts.SidebarWidget.title}</p>
+              <p title={localeTexts.SidebarWidget.title}>{localeTexts.SidebarWidget.title}</p>
             </div>
             <div className="config-container">
               <div className="label-container">

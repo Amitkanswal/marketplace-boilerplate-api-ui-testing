@@ -1,4 +1,4 @@
-import Extension from "@contentstack/app-sdk/dist/src/extension";
+import Extension from "@contentstack/app-sdk/dist/src/uiLocation";
 import { get, isEmpty, keys } from "lodash";
 
 export function getAppLocation(sdk: Extension): string {
@@ -11,4 +11,8 @@ export function getAppLocation(sdk: Extension): string {
     }
   }
   return locationName;
+}
+
+export function generateIsLoadingArray(length: number): string[] {
+  return Array.from({ length }, () => 'undefined');
 }

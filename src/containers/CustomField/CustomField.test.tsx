@@ -33,5 +33,5 @@ test("CustomFieldExtension component", async () => {
     ),
   });
 
-  expect(screen.getByText(/Custom Field/)).toBeInTheDocument();
+  expect(screen.getAllByTitle(/Custom Field/)[0]).toBeInTheDocument();
 });

@@ -7,6 +7,8 @@ import { AppConfigurationExtensionProvider } from "../../common/providers/AppCon
 import { CustomFieldExtensionProvider } from "../../common/providers/CustomFieldExtensionProvider";
 import FieldModifierExtension from "../FieldModifier/FieldModifier";
 
+import '@contentstack/venus-components/build/main.css';
+
 /**
  * All the routes are Lazy loaded.
  * This will ensure the bundle contains only the core code and respective route bundle

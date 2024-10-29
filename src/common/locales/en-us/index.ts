@@ -40,8 +40,8 @@ const localeTexts = {
     },
   },
   SidebarWidget: {
-    title: "Sidebar Widget",
-    body: "This is the iframe that contains your Sidebar Widget.",
+    title: "Entry Sidebar Widget",
+    body: "This is the iframe that contains your Entry Sidebar Widget.",
     button: {
       text: "Learn More",
       url: "https://www.contentstack.com/docs/developers/developer-hub/sidebar-location/",

@@ -33,7 +33,7 @@ const CustomFieldExtension = () => {
           <div className="ui-container">
             <div className="logo-container">
               <img src={Icon} alt="Logo" />
-              <p>{localeTexts.CustomField.title}</p>
+              <p title={localeTexts.CustomField.title}>{localeTexts.CustomField.title}</p>
             </div>
             <div className="config-container">
               <div className="label-container">
