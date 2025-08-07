@@ -35,6 +35,10 @@ export class EntryPage {
     await this.widgetLocator.click();
   }
 
+  async clickFullPageApp() {
+    await this.page.locator('[data-test-id="full-page-lhs-outside-app-icon"]').first().click();
+  }
+
   // Return iframe
   async accessFrame() {
     const elementHandle = await this.page.waitForSelector('div.cs-extension iframe');

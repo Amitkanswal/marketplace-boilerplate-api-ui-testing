@@ -22,8 +22,8 @@ const FullPageExtension: React.FC = () => {
   // Memoize cmsInstance to prevent it from changing on every render
   const cmsInstance = useMemo(() => {
     return client({
-      adapter: appSdk?.createAdapter as AxiosAdapter,
-      baseURL:"https://dev11-api.csnonprod.com/v3",
+      adapter: appSdk?.createAdapter(),
+      baseURL:appSdk?.endpoints.CMA+"/v3",
       headers:{
         "Content-Type":"application/json",
       }

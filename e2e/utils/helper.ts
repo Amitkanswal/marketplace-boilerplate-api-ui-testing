@@ -201,8 +201,26 @@ export const updateApp = async (authToken: string, appId: string) => {
               },
             ],
           },
+          {
+            type: 'cs.cm.stack.full_page',
+            meta: [
+              {
+                name: `App Boilerplate _${Math.floor(Math.random() * 1000)}`,
+                path: '/full-page',
+                signed: false,
+                enabled: true,
+                required: false
+              },
+            ],
+          },
         ],
-        signed: true,
+        permissions:[
+          "cm.stacks.management:read", 
+          "cm.stacks.management:write",
+          "cm.languages.management:read",
+          "cm.languages.management:write"
+        ],
+        signed: false,
         base_url: APP_BASE_URL,
       },
     },

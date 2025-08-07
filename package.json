@@ -6,7 +6,7 @@
     "dist"
   ],
   "dependencies": {
-    "@contentstack/app-sdk": "github:contentstack/app-sdk#feat/MKT-6394-sdk-support",
+    "@contentstack/app-sdk": "^2.3.2",
     "@contentstack/management": "^1.18.2",
     "@contentstack/venus-components": "^1.8.3",
     "@types/node": "^18.19.4",
