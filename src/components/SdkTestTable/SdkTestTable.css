@@ -1,0 +1,146 @@
+.sdk-test-table-container {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.sdk-test-table-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.sdk-test-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sdk-test-table thead {
+  background-color: #f5f5f5;
+}
+
+.sdk-test-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sdk-test-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sdk-test-row:last-child {
+  border-bottom: none;
+}
+
+.sdk-test-row:hover {
+  background-color: #f9f9f9;
+}
+
+.sdk-test-cell {
+  padding: 12px 16px;
+  vertical-align: top;
+}
+
+.sdk-test-cell--name {
+  width: 30%;
+}
+
+.sdk-test-cell--action {
+  width: 20%;
+}
+
+.sdk-test-cell--result {
+  width: 50%;
+}
+
+.sdk-test-name {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.sdk-test-description {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.sdk-test-button {
+  padding: 8px 16px;
+  border: 1px solid #5c67ff;
+  background-color: #5c67ff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sdk-test-button:hover:not(:disabled) {
+  background-color: #4751d6;
+  border-color: #4751d6;
+}
+
+.sdk-test-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sdk-test-button--loading {
+  position: relative;
+  padding-left: 32px;
+}
+
+.sdk-test-button--loading::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: sdk-test-spin 0.8s linear infinite;
+}
+
+@keyframes sdk-test-spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+.sdk-test-result {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.sdk-test-result--error {
+  color: #d32f2f;
+}
+
+.sdk-test-result--success {
+  color: #333;
+}
+
+.sdk-test-result-json {
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 0;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sdk-test-result-text {
+  word-break: break-word;
+}

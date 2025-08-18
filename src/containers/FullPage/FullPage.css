@@ -15,13 +15,13 @@ body {
 .ui-location {
   padding: 1.5rem 1rem;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 1.9375rem;
   flex: 1 0 0;
   height: 80vh;
   width: 95vw;
   max-height: 89vh;
+  overflow: scroll;
 }
 
 .ui-container {

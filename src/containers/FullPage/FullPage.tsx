@@ -1,76 +1,88 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { TestTableComponent } from '../../components/Table';
-import ContentstackAPI from '../../common/cms-api';
-import { client } from '@contentstack/management';
+import React from 'react';
+import { SdkTestTable } from '../../components/SdkTestTable/SdkTestTable';
+import { useSdkTesting } from '../../hooks/useSdkTesting';
 import { useAppSdk } from '../../common/hooks/useAppSdk';
-import { AxiosAdapter } from 'axios';
+import { SDK_TEST_CATEGORIES } from '../../services/sdk-operations';
 import "../index.css";
 import "./FullPage.css";
 
-type ResponseItem = {
-  name: string;
-  id: number;
-  status: number;
-  statusText: string;
-  error: string;
-};
-
 const FullPageExtension: React.FC = () => {
-  const [responseCollection, setResponseCollection] = useState<ResponseItem[]>([]);
   const appSdk = useAppSdk();
+  const { state, executeOperation, getFormattedResult, isReady } = useSdkTesting();
 
-  // Memoize cmsInstance to prevent it from changing on every render
-  const cmsInstance = useMemo(() => {
-    return client({
-      adapter: appSdk?.createAdapter(),
-      baseURL:appSdk?.endpoints.CMA+"/v3",
-      headers:{
-        "Content-Type":"application/json",
-      }
-    });
-  }, [appSdk]);
-
-  // Fetch data using useCallback to ensure the function is stable
-  const fetchData = useCallback(async () => {
-    if (!appSdk) {
-      return [];
-    }
-
-    const responses = await Promise.all(
-      (Object.keys(ContentstackAPI) as Array<keyof typeof ContentstackAPI>).map(async (key, idx) => {
-        try {
-          await ContentstackAPI[key](cmsInstance, appSdk);
-          return {
-            name: key,
-            id: idx,
-            status: 200,
-            statusText: "ok",
-            error: "",
-          };
-        } catch (error) {
-          return {
-            name: key,
-            id: idx,
-            status: 500,
-            statusText: "error",
-            error: (error as Error).message || "Unknown error",
-          };
-        }
-      })
+  if (!isReady) {
+    return (
+      <div className="layout-container">
+        <div className="ui-location">
+          <div className="ui-container">
+            <p>Initializing SDK...</p>
+          </div>
+        </div>
+      </div>
     );
-    console.log("responses", responses);
-    
-    return responses;
-  }, [appSdk, cmsInstance]);
-
-  useEffect(() => {
-    fetchData().then(setResponseCollection);
-  }, [fetchData]);
+  }
 
   return (
     <div className="layout-container">
       <div className="ui-location">
-        <TestTableComponent initEventData={responseCollection} />
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>SDK Testing Playground</h1>
+        
+        {state.globalError && (
+          <div 
+            className="error-banner" 
+            data-test-id="sdk-error"
+            style={{
+              padding: '12px',
+              marginBottom: '16px',
+              backgroundColor: '#ffebee',
+              color: '#c62828',
+              borderRadius: '4px',
+              border: '1px solid #ef5350'
+            }}
+          >
+            {state.globalError}
+          </div>
+        )}
+
+        <div style={{ marginTop: 16, width: '100%' }}>
+          {/* Core SDK Methods */}
+          <SdkTestTable
+            title={SDK_TEST_CATEGORIES.CORE.name}
+            operations={SDK_TEST_CATEGORIES.CORE.operations}
+            results={state.results}
+            onExecute={executeOperation}
+            getFormattedResult={getFormattedResult}
+          />
+
+          {/* CMA Operations */}
+          <SdkTestTable
+            title={SDK_TEST_CATEGORIES.CMA.name}
+            operations={SDK_TEST_CATEGORIES.CMA.operations}
+            results={state.results}
+            onExecute={executeOperation}
+            getFormattedResult={getFormattedResult}
+          />
+
+          {/* Frame Operations - Only show if available */}
+          {appSdk && SDK_TEST_CATEGORIES.FRAME.condition?.(appSdk) && (
+            <SdkTestTable
+              title={SDK_TEST_CATEGORIES.FRAME.name}
+              operations={SDK_TEST_CATEGORIES.FRAME.operations}
+              results={state.results}
+              onExecute={executeOperation}
+              getFormattedResult={getFormattedResult}
+            />
+          )}
+
+          {/* CRUD Operations */}
+          <SdkTestTable
+            title={SDK_TEST_CATEGORIES.CRUD.name}
+            operations={SDK_TEST_CATEGORIES.CRUD.operations}
+            results={state.results}
+            onExecute={executeOperation}
+            getFormattedResult={getFormattedResult}
+          />
+        </div>
       </div>
     </div>
   );

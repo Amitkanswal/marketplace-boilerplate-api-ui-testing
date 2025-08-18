@@ -7,7 +7,11 @@ const { EMAIL, PASSWORD }: any = process.env;
 
 async function globalSetup(config: FullConfig) {
   let loginPage: LoginPage;
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(
+    {
+      headless: false,
+    }
+  );
   const page = await browser.newPage({
     httpCredentials: {
       username: process.env.BASIC_AUTH_USERNAME || '',
