@@ -11,7 +11,8 @@ const usePreRequests = () => {
       "getEnvironments": (await stack?.getEnvironments())?.environments[0]?.name,
       "getGlobalFields": (await stack?.getGlobalFields())?.global_fields[0]?.uid,
       "getLocales": (await stack?.getLocales())?.locales[0].code,
-      "getWorkflows": (await stack?.getWorkflows())?.workflows[0]?.uid
+      // TODO: Uncomment this when the scenario is ready to be tested
+      // "getWorkflows": (await stack?.getWorkflows())?.workflows[0]?.uid
     }
   }, [appSDK]);
 };
