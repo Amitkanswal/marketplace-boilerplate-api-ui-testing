@@ -30,12 +30,12 @@ const useProcessEvent = () => {
       status: <StatusPill status="in-progress" />,
       response: null
     };
-    
+
     if ( !stack) {
       eventObj.status = <StatusPill status="failed" />;
       return eventObj;
     }
-    
+
     if (eventName === "AllStacks" || preRequestEvent.hasOwnProperty(`${eventName}s`)) {
       const requiredData = preRequestEvent[`${eventName}s`];
       if (!requiredData) {

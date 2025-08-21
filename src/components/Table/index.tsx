@@ -7,6 +7,8 @@ import EventTable from './EventTable';
 import StatusPill from './StatusPill';
 import {usePreRequests} from '../../common/hooks/usePreRequests';
 import {useProcessEvent} from '../../common/hooks/useProcessEvent';
+import { useProcessEntryEvent } from "../../common/hooks/useProcessEntryEvent";
+
 
 type Stack = {
   [key: string]: (...args: never[]) => unknown;
@@ -14,47 +16,62 @@ type Stack = {
 
 type TestTableComponentProps = {
   initEventData: {
-    eventName: string;
-    status: ReactNode;
+        eventName: string;
+        status: ReactNode;
   }[] | [];
   updatedEventData?: {
-    eventName: string;
-    status: ReactNode;
+        eventName: string;
+        status: ReactNode;
   }[] | [];
 };
 
 
 export const TestTableComponent: React.FC <TestTableComponentProps> = ({initEventData = [], updatedEventData=[]}) => {
   const appSDK = useAppSdk();
-  const ignoredMethods = ['Asset', 'ContentType', '_connection', '_data', 'search', "_currentBranch"];
+  const ignoredMethods = ["Asset", "ContentType", "_connection", "_data", "search", "_currentBranch", "getVariantById", "getWorkflow", "getWorkflows"];
   //@ts-ignore
   const stack: Stack | undefined = appSDK?.stack;
+  const entryLocation = appSDK?.location.SidebarWidget?.entry;
 
   const methodNames = useMemo(() => {
-    return stack
-      ? Object.getOwnPropertyNames(Object.getPrototypeOf(stack))
-          .filter(name => typeof stack[name] === 'function' && name !== 'constructor' && !ignoredMethods.includes(name))
+    const stackMethods = stack
+      ? Object.getOwnPropertyNames(Object.getPrototypeOf(stack)).filter(
+          (name) => typeof stack[name] === "function" && name !== "constructor" && !ignoredMethods.includes(name)
+        )
       : [];
-  }, [stack]);
+
+    const entryMethods = entryLocation
+      ? Object.getOwnPropertyNames(Object.getPrototypeOf(entryLocation))
+          //@ts-ignore
+          .filter(
+            (name) =>
+              //@ts-ignore
+              typeof entryLocation[name] === "function" && name !== "constructor" && !ignoredMethods.includes(name)
+          )
+      : [];
+    return [...stackMethods, ...entryMethods];
+  }, [stack, entryLocation]);
 
   const [index, setIndex] = useState(generateIsLoadingArray(methodNames.length));
   const preRequests = usePreRequests();
   const processEvent = useProcessEvent();
+  const processEntryEvent = useProcessEntryEvent();
+
   const initialData = useMemo(() => {
-    return methodNames.map(name => ({
+    return methodNames.map((name) => ({
       eventName: name,
-      status: <StatusPill status="in-progress" />
+      status: <StatusPill status="in-progress" />,
     }));
   }, [methodNames]);
-  
+
   const [eventName, setEventName] = useState([...initialData, ...initEventData]);
 
   useEffect(() => {
     eventName.forEach((eventObj, idx) => {
-     const findElement = updatedEventData?.find((element) => element.eventName === eventObj.eventName);
-     if (eventObj.status?.toLocaleString === findElement?.status?.toLocaleString) {
+      const findElement = updatedEventData?.find((element) => element.eventName === eventObj.eventName);
+      if (eventObj.status?.toLocaleString === findElement?.status?.toLocaleString) {
         updateEventName(findElement, idx);
-     }
+      }
     });
   }, [updatedEventData]);
 
@@ -68,46 +85,65 @@ export const TestTableComponent: React.FC <TestTableComponentProps> = ({initEven
         }
       });
     });
-    setIndex((prevIndex) => prevIndex.map((item, idx) => {
-      if (idx === id) {
-        return 'done';
-      }
-      return item;
-    }));
+    setIndex((prevIndex) =>
+      prevIndex.map((item, idx) => {
+        if (idx === id) {
+          return "done";
+        }
+        return item;
+      })
+    );
   }, []);
 
   useEffect(() => {
     (async () => {
       const preRequestEvent = await preRequests;
-      eventName.forEach(async ({ eventName }, idx) => {
-        // these events should be coming from UI locations as they need CBs
-        if (["onChange", "onSave", "onPublish", "onUnPublish"].includes(eventName)) {
-          return;
-          
+      for (let idx = 0; idx < eventName.length; idx++) {
+        const { eventName: currentEventName } = eventName[idx];
+
+        // Skip UI callback events
+        if (["onChange", "onSave", "onPublish", "onUnPublish"].includes(currentEventName)) {
+          continue;
         }
-        const eventObj = await processEvent(eventName, preRequestEvent) as {eventName: string, status: ReactNode};
-        if (index[idx] !== 'done' && eventObj) {
-          updateEventName(eventObj, idx);
+        const isEntryMethod =
+          entryLocation && typeof entryLocation[currentEventName as keyof typeof entryLocation] === "function";
+
+        let eventObj;
+        try {
+          if (isEntryMethod) {
+            eventObj = (await processEntryEvent(currentEventName)) as { eventName: string; status: ReactNode };
+          } else {
+            eventObj = (await processEvent(currentEventName, preRequestEvent)) as {
+              eventName: string;
+              status: ReactNode;
+            };
+          }
+
+          if (index[idx] !== "done" && eventObj) {
+            updateEventName(eventObj, idx);
+          }
+        } catch (error) {
+          console.error(`💥 Error processing ${currentEventName}:`, error);
         }
-      });
+      }
     })();
-  }, [eventName, preRequests, processEvent, updateEventName]);
+  }, [eventName, preRequests, processEvent, processEntryEvent, updateEventName, entryLocation, index]);
 
   const columns = useMemo(() => [
-    {
+      {
       Header: 'Event Name',
       accessor: 'eventName',
       id: 'eventName',
       cssClass: 'uidCustomClass',
-    },
-    {
+      },
+      {
       Header: 'Status',
       accessor: 'status',
       id: 'status',
       cssClass: 'uidCustomClass',
     }
   ], []);
-  
+
   return (
     <div>
       <EventTable data={eventName} columns={columns} />
