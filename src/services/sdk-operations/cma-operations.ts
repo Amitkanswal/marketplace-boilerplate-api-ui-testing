@@ -26,7 +26,6 @@ export const cmaOperations: SdkTestOperation[] = [
                   uid: 'title',
                   data_type: 'text',
                   field_metadata: { _default: true },
-                  format: 'plain_text',
                   mandatory: true,
                   multiple: false,
                   unique: false,
@@ -36,7 +35,6 @@ export const cmaOperations: SdkTestOperation[] = [
                   uid: 'description',
                   data_type: 'text',
                   field_metadata: { _default: true },
-                  format: 'plain_text',
                   multiple: false,
                   unique: false,
                 },
@@ -59,6 +57,33 @@ export const cmaOperations: SdkTestOperation[] = [
     },
     formatResult: (result: any) => JSON.stringify(result),
     validateResult: (result: any) => !!result && (result.status === 'created' || result.status === 'exists'),
+  },
+  {
+    id: 'delete-test-content-type',
+    name: 'Delete Test Content Type',
+    description: 'Delete content type "test_content_type" if it exists',
+    category: 'cma',
+    testId: 'sdk-cma-delete-content-type',
+    resultTestId: 'sdk-cma-delete-result',
+    execute: async (sdk, context) => {
+      if (!context?.cmsInstance || !context?.stackApiKey) {
+        throw new Error('CMS instance or API key not available');
+      }
+      const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
+      try {
+        await stack.contentType('test_content_type').delete();
+        return { status: 'deleted', uid: 'test_content_type' };
+      } catch (error: any) {
+        // If doesn't exist, treat as success (already deleted)
+        const msg = (error?.data?.error_message || '').toString().toLowerCase();
+        if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('not exist')) {
+          return { status: 'not found', uid: 'test_content_type' };
+        }
+        throw error;
+      }
+    },
+    formatResult: (result: any) => JSON.stringify(result),
+    validateResult: (result: any) => !!result && (result.status === 'deleted' || result.status === 'not found'),
   },
   {
     id: 'list-content-types',

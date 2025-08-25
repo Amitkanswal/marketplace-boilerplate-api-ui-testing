@@ -1,5 +1,6 @@
 import React from 'react';
 import { SdkTestOperation, SdkTestResult } from '../../types/sdk-testing.types';
+import { Button, Icon, Heading } from '@contentstack/venus-components';
 import './SdkTestTable.css';
 
 interface SdkTestTableProps {
@@ -19,83 +20,113 @@ export const SdkTestTable: React.FC<SdkTestTableProps> = ({
   title,
   className = ''
 }) => {
+  const renderStatusPill = (result?: SdkTestResult) => {
+    const hasError = result?.status === 'error';
+    const isSuccess = result?.status === 'success';
+    const isLoading = result?.status === 'loading';
+
+    if (isLoading) {
+      return (
+        <div className='loading-pill'>
+          <Icon icon='CheckCircle' />
+          <span>Loading...</span>
+        </div>
+        
+      );
+    }
+
+    if (hasError) {
+      return (
+        <div className='error-pill'>
+          <span>Error</span>
+        </div>
+      );
+
+    }
+
+    if (isSuccess) {
+      return (
+        <div className='success-pill'>
+          <span>Success</span>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        
+      </div>
+    );
+  };
+
   return (
     <div className={`sdk-test-table-container ${className}`}>
-      {title && <h3 className="sdk-test-table-title">{title}</h3>}
-      <table className="sdk-test-table">
+      {title && <Heading tagName="h3" text={title} />}
+      <table className="venus-enhanced-table">
         <thead>
           <tr>
             <th>Test</th>
             <th>Action</th>
+            <th>Status</th>
             <th>Result</th>
           </tr>
         </thead>
         <tbody>
-          {operations.map(operation => (
-            <SdkTestRow
-              key={operation.id}
-              operation={operation}
-              result={results[operation.id]}
-              onExecute={() => onExecute(operation)}
-              formattedResult={getFormattedResult(operation.id, operation.formatResult)}
-            />
-          ))}
+          {operations.map(operation => {
+            const result = results[operation.id];
+            const formattedResult = getFormattedResult(operation.id, operation.formatResult);
+            const isLoading = result?.status === 'loading';
+
+            return (
+              <tr key={operation.id} className="venus-table-row">
+                <td className="venus-table-cell">
+                  <div className="sdk-test-name-cell">
+                    <div className="sdk-test-name">{operation.name}</div>
+                    {operation.description && (
+                      <div className="sdk-test-description">{operation.description}</div>
+                    )}
+                  </div>
+                </td>
+                
+                <td className="venus-table-cell">
+                  <Button
+                    buttonType="primary"
+                    size="small"
+                    onClick={() => onExecute(operation)}
+                    disabled={isLoading}
+                    data-test-id={operation.testId}
+                  >
+                    {isLoading ? 'Executing...' : operation.name}
+                  </Button>
+                </td>
+                
+                <td className="venus-table-cell venus-table-cell--status">
+                  {renderStatusPill(result)}
+                </td>
+                
+                <td className="venus-table-cell">
+                  <div 
+                    data-test-id={operation.resultTestId}
+                    className="sdk-test-result-content"
+                  >
+                    {!isLoading && formattedResult && (
+                      <>
+                        {operation.formatResult && formattedResult.includes('{') ? (
+                          <pre className="sdk-test-result-json">{formattedResult}</pre>
+                        ) : (
+                          <span className="sdk-test-result-text">{formattedResult}</span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 };
 
-interface SdkTestRowProps {
-  operation: SdkTestOperation;
-  result?: SdkTestResult;
-  onExecute: () => void;
-  formattedResult: string;
-}
-
-const SdkTestRow: React.FC<SdkTestRowProps> = ({
-  operation,
-  result,
-  onExecute,
-  formattedResult
-}) => {
-  const isLoading = result?.status === 'loading';
-  const hasError = result?.status === 'error';
-  const isSuccess = result?.status === 'success';
-  
-  return (
-    <tr className="sdk-test-row">
-      <td className="sdk-test-cell sdk-test-cell--name">
-        <div className="sdk-test-name">{operation.name}</div>
-        {operation.description && (
-          <div className="sdk-test-description">{operation.description}</div>
-        )}
-      </td>
-      <td className="sdk-test-cell sdk-test-cell--action">
-        <button
-          data-test-id={operation.testId}
-          onClick={onExecute}
-          disabled={isLoading}
-          className={`sdk-test-button ${isLoading ? 'sdk-test-button--loading' : ''}`}
-        >
-          {isLoading ? 'Executing...' : operation.name}
-        </button>
-      </td>
-      <td className="sdk-test-cell sdk-test-cell--result">
-        <div 
-          data-test-id={operation.resultTestId}
-          className={`sdk-test-result ${
-            hasError ? 'sdk-test-result--error' : 
-            isSuccess ? 'sdk-test-result--success' : ''
-          }`}
-        >
-          {operation.formatResult && formattedResult.includes('{') ? (
-            <pre className="sdk-test-result-json">{formattedResult}</pre>
-          ) : (
-            <span className="sdk-test-result-text">{formattedResult}</span>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
-};
+// Component now uses HTML table structure with Venus components (Button, Icon, Pills, Heading)
