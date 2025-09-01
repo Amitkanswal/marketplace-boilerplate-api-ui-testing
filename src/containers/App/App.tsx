@@ -8,6 +8,7 @@ import { CustomFieldExtensionProvider } from "../../common/providers/CustomField
 import FieldModifierExtension from "../FieldModifier/FieldModifier";
 
 import '@contentstack/venus-components/build/main.css';
+import EntrySidebarWidget from "../EntrySidebarWidget/EntrySidebarWidget";
 
 /**
  * All the routes are Lazy loaded.
@@ -16,6 +17,7 @@ import '@contentstack/venus-components/build/main.css';
  */
 const CustomFieldExtension = React.lazy(() => import("../CustomField/CustomField"));
 const EntrySidebarExtension = React.lazy(() => import("../SidebarWidget/EntrySidebar"));
+const ContentTypeSidebarExtension = React.lazy(() => import("../ContentTypeSidebarWidget/ContentTypeSidebar"));
 const AppConfigurationExtension = React.lazy(() => import("../AppConfiguration/AppConfiguration"));
 const AssetSidebarExtension = React.lazy(() => import("../AssetSidebarWidget/AssetSidebar"));
 const StackDashboardExtension = React.lazy(() => import("../DashboardWidget/StackDashboard"));
@@ -46,6 +48,22 @@ function App() {
                 <EntrySidebarExtensionProvider>
                   <EntrySidebarExtension />
                 </EntrySidebarExtensionProvider>
+              </Suspense>
+            }
+          />
+          <Route
+            path="/content-type-sidebar"
+            element={
+              <Suspense>
+                <ContentTypeSidebarExtension />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/entry-sidebar-widget"
+            element={
+              <Suspense>
+                <EntrySidebarWidget />
               </Suspense>
             }
           />

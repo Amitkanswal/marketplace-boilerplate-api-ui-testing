@@ -82,6 +82,33 @@ const FullPageExtension: React.FC = () => {
             onExecute={executeOperation}
             getFormattedResult={getFormattedResult}
           />
+
+          {/* API Operations */}
+          <SdkTestTable
+            title={SDK_TEST_CATEGORIES.API.name}
+            operations={SDK_TEST_CATEGORIES.API.operations}
+            results={state.results}
+            onExecute={executeOperation}
+            getFormattedResult={getFormattedResult}
+          />
+
+          {/* Store Operations */}
+          <SdkTestTable
+            title={SDK_TEST_CATEGORIES.STORE.name}
+            operations={SDK_TEST_CATEGORIES.STORE.operations}
+            results={state.results}
+            onExecute={executeOperation}
+            getFormattedResult={getFormattedResult}
+          />
+
+          {/* Metadata Operations */}
+          <SdkTestTable
+            title={SDK_TEST_CATEGORIES.METADATA.name}
+            operations={SDK_TEST_CATEGORIES.METADATA.operations}
+            results={state.results}
+            onExecute={executeOperation}
+            getFormattedResult={getFormattedResult}
+          />
         </div>
       </div>
     </div>

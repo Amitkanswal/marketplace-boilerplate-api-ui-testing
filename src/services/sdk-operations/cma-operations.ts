@@ -41,7 +41,9 @@ export const cmaOperations: SdkTestOperation[] = [
               ],
               options: {
                 is_page: false,
-                title: 'title',
+                singleton: false,
+                title: 'Test Content Type',
+                sub_title: ['Test Content Type Description'],
               },
             },
           });

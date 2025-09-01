@@ -1,7 +1,8 @@
 import UiLocation from '@contentstack/app-sdk/dist/src/uiLocation';
+import { ContentstackClient } from '@contentstack/management';
 
 export type TestStatus = 'idle' | 'loading' | 'success' | 'error';
-export type TestCategory = 'core' | 'cma' | 'frame' | 'crud';
+export type TestCategory = 'core' | 'cma' | 'frame' | 'crud' | 'api' | 'store' | 'metadata' | 'cts' | 'esb';
 
 export interface SdkTestResult {
   status: TestStatus;
@@ -24,7 +25,7 @@ export interface SdkTestOperation {
 }
 
 export interface SdkTestContext {
-  cmsInstance?: any; // CMS client instance
+  cmsInstance?: ContentstackClient | null; // CMS client instance
   previousResults?: Record<string, unknown>;
   stackApiKey?: string;
 }

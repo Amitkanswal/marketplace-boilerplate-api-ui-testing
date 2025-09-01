@@ -3,6 +3,9 @@ import { coreSdkOperations } from './core-operations';
 import { cmaOperations } from './cma-operations';
 import { frameOperations, canUseFrameOperations } from './frame-operations';
 import { crudOperations } from './crud-operations';
+import { apiOperations } from './api-operations';
+import { storeOperations } from './store-operations';
+import { metadataOperations } from './metadata-operations';
 
 /**
  * Get all SDK test operations
@@ -12,7 +15,10 @@ export function getAllOperations(): SdkTestOperation[] {
     ...coreSdkOperations,
     ...cmaOperations,
     ...frameOperations,
-    ...crudOperations
+    ...crudOperations,
+    ...apiOperations,
+    ...storeOperations,
+    ...metadataOperations
   ];
 }
 
@@ -55,9 +61,27 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
   },
   CRUD: {
     id: 'crud',
-    name: 'CRUD Operations',
+    name: 'CRUD Operations using Adapter',
     description: 'Create, Read, Update, Delete operations for entries and assets',
     operations: crudOperations
+  },
+  API: {
+    id: 'api',
+    name: 'CRUD Operations using API',
+    description: 'API operations',
+    operations: apiOperations
+  },
+  STORE: {
+    id: 'store',
+    name: 'Store Operations',
+    description: 'SDK persistent store operations',
+    operations: storeOperations
+  },
+  METADATA: {
+    id: 'metadata',
+    name: 'Metadata Operations',
+    description: 'Create, retrieve, list, update, and delete metadata',
+    operations: metadataOperations
   }
 };
 
