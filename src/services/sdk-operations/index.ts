@@ -6,6 +6,8 @@ import { crudOperations } from './crud-operations';
 import { apiOperations } from './api-operations';
 import { storeOperations } from './store-operations';
 import { metadataOperations } from './metadata-operations';
+import { ctsOperations } from './cts-operations';
+import { esbOperations } from './esb-operations';
 
 /**
  * Get all SDK test operations
@@ -82,6 +84,18 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'Metadata Operations',
     description: 'Create, retrieve, list, update, and delete metadata',
     operations: metadataOperations
+  },
+  CTS: {
+    id: 'cts',
+    name: 'CTS Operations',
+    description: 'CTS operations',
+    operations: ctsOperations
+  },
+  ESB: {
+    id: 'esb',
+    name: 'ESB Operations',
+    description: 'ESB operations',
+    operations: esbOperations
   }
 };
 

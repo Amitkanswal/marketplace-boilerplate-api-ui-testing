@@ -9,10 +9,11 @@ export const esbOperations: SdkTestOperation[] = [
     testId: 'sdk-esb-entry',
     resultTestId: 'sdk-esb-entry-result',
     execute: async (sdk) => {
-      const entry = (sdk as any)?.location?.SidebarWidget?.entry;
+      const entry = sdk?.location?.SidebarWidget?.entry;
       if (!entry || typeof entry.getData !== 'function') {
         throw new Error('Entry object or getData() not available at SidebarWidget');
       }
+      
       const data = await entry.getData();
       // Return a compact subset to display in UI
       return {
