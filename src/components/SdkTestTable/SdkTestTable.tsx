@@ -61,7 +61,7 @@ export const SdkTestTable: React.FC<SdkTestTableProps> = ({
 
   return (
     <div className={`sdk-test-table-container ${className}`}>
-      {title && <Heading tagName="h3" text={title} />}
+      {title && <h3>{title}</h3>}
       <table className="venus-enhanced-table">
         <thead>
           <tr>
