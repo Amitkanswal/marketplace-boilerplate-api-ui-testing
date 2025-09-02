@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useState, useMemo, useEffect, useCallback, ReactNode } from 'react';
-import { useAppSdk } from '../../common/hooks/useAppSdk';
-import { generateIsLoadingArray } from '../../common/utils/functions';
-import EventTable from './EventTable';
-import StatusPill from './StatusPill';
-import {usePreRequests} from '../../common/hooks/usePreRequests';
-import {useProcessEvent} from '../../common/hooks/useProcessEvent';
+import React, { useState, useMemo, useEffect, useCallback, ReactNode } from "react";
+import { useAppSdk } from "../../common/hooks/useAppSdk";
+import { generateIsLoadingArray } from "../../common/utils/functions";
+import EventTable from "./EventTable";
+import StatusPill from "./StatusPill";
+import { usePreRequests } from "../../common/hooks/usePreRequests";
+import { useProcessEvent } from "../../common/hooks/useProcessEvent";
 import { useProcessEntryEvent } from "../../common/hooks/useProcessEntryEvent";
-
 
 type Stack = {
   [key: string]: (...args: never[]) => unknown;
@@ -129,20 +128,41 @@ export const TestTableComponent: React.FC <TestTableComponentProps> = ({initEven
     })();
   }, [eventName, preRequests, processEvent, processEntryEvent, updateEventName, entryLocation, index]);
 
-  const columns = useMemo(() => [
+  const columns = useMemo(
+    () => [
       {
-      Header: 'Event Name',
-      accessor: 'eventName',
-      id: 'eventName',
-      cssClass: 'uidCustomClass',
+        Header: "Event Name",
+        accessor: "eventName",
+        id: "eventName",
+        cssClass: "uidCustomClass",
       },
       {
-      Header: 'Status',
-      accessor: 'status',
-      id: 'status',
-      cssClass: 'uidCustomClass',
-    }
-  ], []);
+        Header: "Status",
+        accessor: "status",
+        id: "status",
+        cssClass: "uidCustomClass",
+      },
+      {
+        Header: 'Result',
+        accessor: 'response',
+        id: 'response',
+        cssClass: 'uidCustomClass',
+        Cell: ({ row }: any) => (
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'monospace',
+            maxWidth: '200px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {row.original.response ? JSON.stringify(row.original.response) : 'No result'}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <div>
