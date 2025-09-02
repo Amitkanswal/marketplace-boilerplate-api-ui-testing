@@ -1,0 +1,45 @@
+{
+  "cookies": [
+    {
+      "name": "authtoken",
+      "value": "QIS45mqrWvP87iwA8RbULla6fZkfqwxaqZVQ40TzZEM=",
+      "domain": "dev11-app.csnonprod.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__cs_user",
+      "value": "bltbc85439d3b0e4222",
+      "domain": "dev11-app.csnonprod.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_dd_s",
+      "value": "rum=0&expire=1754914659313",
+      "domain": "dev11-app.csnonprod.com",
+      "path": "/",
+      "expires": 1754914660,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Strict"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://dev11-app.csnonprod.com",
+      "localStorage": [
+        {
+          "name": "organization",
+          "value": "{\"blt2688c59643ac31ca\":\"bltbab1854e053163ed\"}"
+        }
+      ]
+    }
+  ]
+}

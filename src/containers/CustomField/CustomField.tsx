@@ -1,62 +1,76 @@
-import React, { useCallback, useState } from "react";
-import localeTexts from "../../common/locales/en-us/index";
-import parse from "html-react-parser";
+import React, { useEffect, useState } from "react";
 import { useAppConfig } from "../../common/hooks/useAppConfig";
+import { useAppSdk } from '../../common/hooks/useAppSdk';
+import { TestTableComponent } from '../../components/Table';
+import { useExtensionEvents } from '../../common/hooks/useExtensionEvents';
+import StatusPill from '../../components/Table/StatusPill';
 import "../index.css";
 import "./CustomField.css";
-import Icon from "../../assets/Custom-Field-Logo.svg";
-import ReadOnly from "../../assets/lock.svg";
-import JsonView from "../../assets/JsonView.svg";
-import ConfigModal from "../../components/ConfigModal/ConfigModal";
 
 const CustomFieldExtension = () => {
-  const appConfig = useAppConfig();
+  const appSDK = useAppSdk();
 
-  const [isRawConfigModalOpen, setRawConfigModalOpen] = useState<boolean>(false);
+  const customFieldEvent = useExtensionEvents();
+  const [localState, setLocalState] = useState(customFieldEvent);
 
-  const handleViewRawConfig = useCallback(() => {
-    setRawConfigModalOpen(true);
-  }, []);
+  useEffect(() => {
+    
+    appSDK?.location.CustomField?.entry.onChange((data) => {
+      console.log("CustomField onChange", data);
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onChange') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
 
-  const handleCloseModal = useCallback(() => {
-    setRawConfigModalOpen(false);
-  }, []);
+    appSDK?.location.CustomField?.entry.onSave((data) => {
+      console.log("CustomField onSave", data);
+  
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onSave') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
 
-  const sampleAppConfig = appConfig?.["sample_app_configuration"] || "";
-  const trimmedSampleAppConfig =
-    sampleAppConfig.length > 17 ? `${sampleAppConfig.substring(0, 17)}...` : sampleAppConfig;
+    appSDK?.location.CustomField?.entry.onPublish((data) => {
+      console.log("CustomField onPublish", data);
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onPublish') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
+
+    appSDK?.location.CustomField?.entry.onUnPublish((data) => {
+      console.log("CustomField onUnPublish", data);
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onUnPublish') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
+
+  }, [])
 
   return (
     <div className="layout-container">
       <div className="ui-location-wrapper">
         <div className="ui-location">
-          <div className="ui-container">
-            <div className="logo-container">
-              <img src={Icon} alt="Logo" />
-              <p title={localeTexts.CustomField.title}>{localeTexts.CustomField.title}</p>
-            </div>
-            <div className="config-container">
-              <div className="label-container">
-                <p className="label">Sample App Configuration</p>
-                <p className="info">(read only)</p>
-              </div>
-              <div className="input-wrapper">
-                <div className="input-container">
-                  <p className="config-value">{trimmedSampleAppConfig}</p>
-                  <img src={ReadOnly} alt="ReadOnlyLogo" />
-                </div>
-
-                <img src={JsonView} alt="Show-Json-CTA" className="show-json-cta" onClick={handleViewRawConfig} />
-                {isRawConfigModalOpen && appConfig && <ConfigModal config={appConfig} onClose={handleCloseModal} />}
-              </div>
-            </div>
-            <div className="location-description">
-              <p className="location-description-text">{parse(localeTexts.CustomField.body)}</p>
-              <a target="_blank" rel="noreferrer" href={localeTexts.CustomField.button.url}>
-                <span className="location-description-link">{localeTexts.CustomField.button.text}</span>
-              </a>
-            </div>
-          </div>
+          <TestTableComponent initEventData={customFieldEvent} updatedEventData={localState}/>
         </div>
       </div>
     </div>

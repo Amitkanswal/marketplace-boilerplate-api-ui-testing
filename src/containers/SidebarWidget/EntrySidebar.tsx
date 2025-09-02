@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import localeTexts from "../../common/locales/en-us/index";
 import parse from "html-react-parser";
 import { useAppConfig } from "../../common/hooks/useAppConfig";
@@ -8,55 +8,75 @@ import Icon from "../../assets/Entry-Sidebar-Logo.svg";
 import ReadOnly from "../../assets/lock.svg";
 import JsonView from "../../assets/JsonView.svg";
 import ConfigModal from "../../components/ConfigModal/ConfigModal";
+import { useAppSdk } from "../../common/hooks/useAppSdk";
+import { useExtensionEvents } from "../../common/hooks/useExtensionEvents";
+import { TestTableComponent } from "../../components/Table";
+import StatusPill from "../../components/Table/StatusPill";
 
 const EntrySidebarExtension = () => {
   const appConfig = useAppConfig();
+  const appSDK = useAppSdk();
 
-  const [isRawConfigModalOpen, setRawConfigModalOpen] = useState<boolean>(false);
+  const customFieldEvent = useExtensionEvents();
+  const [localState, setLocalState] = useState(customFieldEvent);
 
-  const handleViewRawConfig = useCallback(() => {
-    setRawConfigModalOpen(true);
-  }, []);
+  useEffect(() => {
+    appSDK?.location.SidebarWidget?.entry.onChange((data) => {
+      console.log("SidebarWidget onChange", data);
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onChange') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
 
-  const handleCloseModal = useCallback(() => {
-    setRawConfigModalOpen(false);
-  }, []);
+    appSDK?.location.SidebarWidget?.entry.onSave((data) => {
+      console.log("SidebarWidget onSave", data);
 
-  const sampleAppConfig = appConfig?.["sample_app_configuration"] || "";
-  const trimmedSampleAppConfig =
-    sampleAppConfig.length > 15 ? `${sampleAppConfig.substring(0, 15)}...` : sampleAppConfig;
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onSave') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
+
+    appSDK?.location.SidebarWidget?.entry.onPublish((data) => {
+      console.log("SidebarWidget onPublish", data);
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onPublish') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
+
+    appSDK?.location.SidebarWidget?.entry.onUnPublish((data) => {
+      console.log("SidebarWidget onUnPublish", data);
+      setLocalState((prev) => {
+        return prev.map((item) => {
+          if (item.eventName === 'onUnPublish') {
+            return { ...item, status: <StatusPill status="done" /> }
+          }
+          return item
+        })
+      })
+    });
+
+  }, [])
 
   return (
     <div className="layout-container">
       <div className="ui-location-wrapper">
         <div className="ui-location">
-          <div className="ui-container">
-            <div className="logo-container">
-              <img src={Icon} alt="Logo" />
-              <p title={localeTexts.SidebarWidget.title}>{localeTexts.SidebarWidget.title}</p>
-            </div>
-            <div className="config-container">
-              <div className="label-container">
-                <p className="label">Sample App Configuration</p>
-                <p className="info">(read only)</p>
-              </div>
-              <div className="input-wrapper">
-                <div className="input-container">
-                  <p className="config-value">{trimmedSampleAppConfig}</p>
-                  <img src={ReadOnly} alt="ReadOnlyLogo" />
-                </div>
-
-                <img src={JsonView} alt="Show-Json-CTA" className="show-json-cta" onClick={handleViewRawConfig} />
-                {isRawConfigModalOpen && appConfig && <ConfigModal config={appConfig} onClose={handleCloseModal} />}
-              </div>
-            </div>
-            <div className="location-description">
-              <p className="location-description-text">{parse(localeTexts.SidebarWidget.body)}</p>
-              <a target="_blank" rel="noreferrer" href={localeTexts.SidebarWidget.button.url}>
-                <span className="location-description-link">{localeTexts.SidebarWidget.button.text}</span>
-              </a>
-            </div>
-          </div>
+          <TestTableComponent initEventData={customFieldEvent} updatedEventData={localState} />
         </div>
       </div>
     </div>
