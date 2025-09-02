@@ -37,7 +37,7 @@ export const SdkTestCards: React.FC<SdkTestCardsProps> = ({
 
   return (
     <div className="sdk-cards-container">
-      {title && <Heading tagName="h4" text={title} />}
+      {title && <h4>{title}</h4>}
       {operations.map((op) => {
         const result = results[op.id];
         const formatted = getFormattedResult(op.id, op.formatResult);
