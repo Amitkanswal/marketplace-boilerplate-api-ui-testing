@@ -55,6 +55,71 @@ export type SdkTestAction =
   | { type: 'QUEUE_OPERATIONS'; operationIds: string[] }
   | { type: 'CLEAR_QUEUE' };
 
+// Content type operation results
+export interface ContentTypeOperationResult {
+  status: 'created' | 'exists' | 'deleted' | 'not found';
+  uid: string;
+  contentTypeUid?: string;
+}
+
+export interface EntryOperationResult {
+  status: 'created' | 'fetched' | 'deleted' | 'updated';
+  uid: string;
+  title?: string;
+  created_at?: string;
+}
+
+export interface MetadataOperationResult {
+  status: 'created' | 'fetched' | 'updated' | 'deleted';
+  uid: string;
+  notice?: string;
+}
+
+export interface ApiErrorResponse {
+  error_message?: string;
+  error_code?: number;
+  errors?: Record<string, string[]>;
+}
+
+export interface WorkerInfo {
+  parallelIndex?: number;
+}
+
+export interface TestUids {
+  contentTypeUid?: string;
+  entryUid?: string;
+  metadataUid?: string;
+}
+
+// Global window extensions for test UID access (iframe communication)
+declare global {
+  interface Window {
+    e2eTestUIDs: TestUids;
+    getTestUIDs(): TestUids;
+    getTestContentTypeUid(): string;
+    getTestEntryUid(): string;
+    getTestMetadataUid(): string;
+  }
+}
+
+// Helper function to extract content type UID - checks postMessage UIDs first, then context
+export function getContentTypeUidFromContext(context: SdkTestContext | undefined, operationId: string): string {
+  // First, try to get from postMessage UIDs (set by test via iframe communication)
+  if (typeof window !== 'undefined' && window.getTestContentTypeUid) {
+    const testUid = window.getTestContentTypeUid();
+    if (testUid && testUid !== 'test_content_type') {
+      return testUid;
+    }
+  }
+
+  // Fallback to context-based extraction
+  if (!context?.previousResults) {
+    return 'test_content_type';
+  }
+  const createResult = context.previousResults[operationId] as ContentTypeOperationResult;
+  return createResult?.contentTypeUid ?? createResult?.uid ?? 'test_content_type';
+}
+
 // Helper type for operation results
 export interface OperationResultFormatters {
   json: (data: unknown) => string;

@@ -1,10 +1,16 @@
-import { SdkTestOperation } from '../../types/sdk-testing.types';
+import { 
+  SdkTestOperation, 
+  ContentTypeOperationResult, 
+  ApiErrorResponse, 
+  WorkerInfo, 
+  getContentTypeUidFromContext 
+} from '../../types/sdk-testing.types';
 
 export const cmaOperations: SdkTestOperation[] = [
   {
     id: 'create-test-content-type',
     name: 'Create Test Content Type',
-    description: 'Create content type "test_content_type" if it does not exist',
+    description: 'Create content type with dynamic UID to prevent race conditions',
     category: 'cma',
     testId: 'sdk-cma-create-content-type',
     resultTestId: 'sdk-cma-ct-result',
@@ -12,14 +18,22 @@ export const cmaOperations: SdkTestOperation[] = [
       if (!context?.cmsInstance || !context?.stackApiKey) {
         throw new Error('CMS instance or API key not available');
       }
+      
+      // Generate unique content type UID to prevent race conditions in parallel tests
+      const timestamp = Date.now();
+      const workerInfo = (globalThis as any).__playwright_worker_info as WorkerInfo | undefined;
+      const workerIndex = workerInfo?.parallelIndex ?? Math.floor(Math.random() * 1000);
+      const contentTypeUid = `test_content_type_w${workerIndex}_t${timestamp}`;
+      const contentTypeTitle = `Test Content Type (Worker ${workerIndex})`;
+      
       const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
       try {
         const ct = await stack
           .contentType()
           .create({
             content_type: {
-              title: 'Test Content Type',
-              uid: 'test_content_type',
+              title: contentTypeTitle,
+              uid: contentTypeUid,
               schema: [
                 {
                   display_name: 'Title',
@@ -42,28 +56,37 @@ export const cmaOperations: SdkTestOperation[] = [
               options: {
                 is_page: false,
                 singleton: false,
-                title: 'Test Content Type',
+                title: contentTypeTitle,
                 sub_title: ['Test Content Type Description'],
               },
             },
           });
-        return { status: 'created', uid: ct?.uid || 'test_content_type' };
-      } catch (error: any) {
-        // If already exists, treat as success
-        const msg = (error?.data?.error_message || '').toString().toLowerCase();
-        if (msg.includes('already') || msg.includes('exists') || msg.includes('duplicate')) {
-          return { status: 'exists', uid: 'test_content_type' };
+        return { status: 'created', uid: ct?.uid ?? contentTypeUid, contentTypeUid };
+      } catch (error: unknown) {
+        const apiError = (error as { data?: ApiErrorResponse })?.data ?? {};
+        const errorCode = apiError.error_code;
+        const errors = apiError.errors;
+        // Handle error code 115: validation errors with "not unique" messages
+        if (errorCode === 115 || 
+            (errors && Object.values(errors).some((err: string[]) => 
+              Array.isArray(err) && err.some(e => e.toLowerCase().includes('not unique'))
+            ))) {
+          return { status: 'exists', uid: contentTypeUid, contentTypeUid };
         }
+        
         throw error;
       }
     },
-    formatResult: (result: any) => JSON.stringify(result),
-    validateResult: (result: any) => !!result && (result.status === 'created' || result.status === 'exists'),
+    formatResult: (result: unknown) => JSON.stringify(result),
+    validateResult: (result: unknown): result is ContentTypeOperationResult => {
+      const ctResult = result as ContentTypeOperationResult;
+      return !!(ctResult && (ctResult.status === 'created' || ctResult.status === 'exists'));
+    },
   },
   {
     id: 'delete-test-content-type',
     name: 'Delete Test Content Type',
-    description: 'Delete content type "test_content_type" if it exists',
+    description: 'Delete content type using UID from context',
     category: 'cma',
     testId: 'sdk-cma-delete-content-type',
     resultTestId: 'sdk-cma-delete-result',
@@ -71,21 +94,27 @@ export const cmaOperations: SdkTestOperation[] = [
       if (!context?.cmsInstance || !context?.stackApiKey) {
         throw new Error('CMS instance or API key not available');
       }
+      
+      const contentTypeUid = getContentTypeUidFromContext(context, 'create-test-content-type');
+      
       const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
       try {
-        await stack.contentType('test_content_type').delete();
-        return { status: 'deleted', uid: 'test_content_type' };
-      } catch (error: any) {
-        // If doesn't exist, treat as success (already deleted)
-        const msg = (error?.data?.error_message || '').toString().toLowerCase();
+        await stack.contentType(contentTypeUid).delete();
+        return { status: 'deleted', uid: contentTypeUid };
+      } catch (error: unknown) {
+        const apiError = (error as { data?: ApiErrorResponse })?.data ?? {};
+        const msg = (apiError.error_message ?? '').toString().toLowerCase();
         if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('not exist')) {
-          return { status: 'not found', uid: 'test_content_type' };
+          return { status: 'not found', uid: contentTypeUid };
         }
         throw error;
       }
     },
-    formatResult: (result: any) => JSON.stringify(result),
-    validateResult: (result: any) => !!result && (result.status === 'deleted' || result.status === 'not found'),
+    formatResult: (result: unknown) => JSON.stringify(result),
+    validateResult: (result: unknown): result is ContentTypeOperationResult => {
+      const ctResult = result as ContentTypeOperationResult;
+      return !!(ctResult && (ctResult.status === 'deleted' || ctResult.status === 'not found'));
+    },
   },
   {
     id: 'list-content-types',
@@ -105,7 +134,7 @@ export const cmaOperations: SdkTestOperation[] = [
       
       return { count: items.length };
     },
-    formatResult: (result: any) => JSON.stringify(result),
+    formatResult: (result: unknown) => JSON.stringify(result),
     validateResult: (result: any) => {
       return result && typeof result.count === 'number' && result.count >= 0;
     }

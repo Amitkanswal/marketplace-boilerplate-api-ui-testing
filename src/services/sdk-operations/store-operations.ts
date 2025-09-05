@@ -16,7 +16,10 @@ export const storeOperations: SdkTestOperation[] = [
       return { status: 'ok', key: TEST_KEY, value: TEST_VALUE };
     },
     formatResult: (result: unknown) => JSON.stringify(result),
-    validateResult: (result: any) => result?.status === 'ok'
+    validateResult: (result: unknown) => {
+      const statusResult = result as { status?: string };
+      return statusResult?.status === 'ok';
+    }
   },
   {
     id: 'sdk-store-get',
@@ -31,7 +34,10 @@ export const storeOperations: SdkTestOperation[] = [
       return { key: TEST_KEY, value };
     },
     formatResult: (result: unknown) => JSON.stringify(result),
-    validateResult: (result: any) => result?.value === TEST_VALUE
+    validateResult: (result: unknown) => {
+      const valueResult = result as { value?: string };
+      return valueResult?.value === TEST_VALUE;
+    }
   },
   {
     id: 'sdk-store-get-all',
@@ -46,7 +52,10 @@ export const storeOperations: SdkTestOperation[] = [
       return { hasKey: Object.prototype.hasOwnProperty.call(all || {}, TEST_KEY), data: all };
     },
     formatResult: (result: unknown) => JSON.stringify(result),
-    validateResult: (result: any) => result?.hasKey === true
+    validateResult: (result: unknown) => {
+      const hasKeyResult = result as { hasKey?: boolean };
+      return hasKeyResult?.hasKey === true;
+    }
   },
   {
     id: 'sdk-store-remove',
@@ -61,7 +70,10 @@ export const storeOperations: SdkTestOperation[] = [
       return { status: 'ok', key: TEST_KEY };
     },
     formatResult: (result: unknown) => JSON.stringify(result),
-    validateResult: (result: any) => result?.status === 'ok'
+    validateResult: (result: unknown) => {
+      const statusResult = result as { status?: string };
+      return statusResult?.status === 'ok';
+    }
   },
   {
     id: 'sdk-store-clear',
@@ -76,7 +88,10 @@ export const storeOperations: SdkTestOperation[] = [
       return { status: 'ok' };
     },
     formatResult: (result: unknown) => JSON.stringify(result),
-    validateResult: (result: any) => result?.status === 'ok'
+    validateResult: (result: unknown) => {
+      const statusResult = result as { status?: string };
+      return statusResult?.status === 'ok';
+    }
   },
   {
     id: 'sdk-store-get-missing',
@@ -89,15 +104,16 @@ export const storeOperations: SdkTestOperation[] = [
         try {
 
             const value = await sdk.store.get('missing_key_e2e');
-            console.log('Store get missing value:', value);
             return { value: value ?? null };
         } catch (error) {
-            console.log('Store get missing error:', error);
             return { value: null };
         }
     },
     formatResult: (result: unknown) => JSON.stringify(result),
-    validateResult: (result: any) => result?.value === null
+    validateResult: (result: unknown) => {
+      const valueResult = result as { value?: string | null };
+      return valueResult?.value === null;
+    }
   }
 ];
 

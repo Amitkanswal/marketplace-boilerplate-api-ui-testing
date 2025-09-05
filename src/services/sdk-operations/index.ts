@@ -104,8 +104,17 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
  */
 export const resultFormatters = {
   json: (data: unknown) => JSON.stringify(data, null, 2),
-  string: (data: unknown) => String(data || ''),
-  count: (data: any) => `Count: ${data?.count || 0}`,
-  status: (data: any) => `Status: ${data?.status || 'unknown'}`,
-  error: (data: any) => `Error: ${data?.error || data?.message || 'Unknown error'}`
+  string: (data: unknown) => String(data ?? ''),
+  count: (data: unknown) => {
+    const countData = data as { count?: number };
+    return `Count: ${countData?.count ?? 0}`;
+  },
+  status: (data: unknown) => {
+    const statusData = data as { status?: string };
+    return `Status: ${statusData?.status ?? 'unknown'}`;
+  },
+  error: (data: unknown) => {
+    const errorData = data as { error?: string; message?: string };
+    return `Error: ${errorData?.error ?? errorData?.message ?? 'Unknown error'}`;
+  }
 };
