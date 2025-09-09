@@ -1,8 +1,11 @@
-import { SdkTestOperation } from '../../types/sdk-testing.types';
+import { 
+  SdkTestOperation, 
+  EntryOperationResult, 
+  getContentTypeUidFromContext 
+} from '../../types/sdk-testing.types';
 
 // Store entry UID between operations
 let createdEntryUid = '';
-let createdAssetUid = '';
 
 export const crudOperations: SdkTestOperation[] = [
   {
@@ -24,12 +27,14 @@ export const crudOperations: SdkTestOperation[] = [
         description: 'Created via SDK E2E test'
       };
       
+      const contentTypeUid = getContentTypeUidFromContext(context, 'create-test-content-type');
+      
       const response = await stack
-        .contentType('test_content_type')
+        .contentType(contentTypeUid)
         .entry()
         .create({ entry: entryData });
       
-      createdEntryUid = response.uid || response.entry?.uid || '';
+      createdEntryUid = response.uid ?? response.entry?.uid ?? '';
       
       return {
         status: 'created',
@@ -37,9 +42,10 @@ export const crudOperations: SdkTestOperation[] = [
         title: entryData.title
       };
     },
-    formatResult: (result: any) => JSON.stringify(result),
-    validateResult: (result: any) => {
-      return result?.status === 'created' && !!result?.uid;
+    formatResult: (result: unknown) => JSON.stringify(result),
+    validateResult: (result: unknown): result is EntryOperationResult => {
+      const entryResult = result as EntryOperationResult;
+      return entryResult?.status === 'created' && !!entryResult?.uid;
     }
   },
   {
@@ -61,21 +67,24 @@ export const crudOperations: SdkTestOperation[] = [
       
       const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
       
+      const contentTypeUid = getContentTypeUidFromContext(context, 'create-test-content-type');
+      
       const entry = await stack
-        .contentType('test_content_type')
+        .contentType(contentTypeUid)
         .entry(createdEntryUid)
         .fetch();
       
       return {
         status: 'fetched',
         uid: entry.uid,
-        title: entry.title || 'No title',
+        title: entry.title ?? 'No title',
         created_at: entry.created_at
       };
     },
-    formatResult: (result: any) => JSON.stringify(result, null, 2),
-    validateResult: (result: any) => {
-      return result?.status === 'fetched' && !!result?.uid;
+    formatResult: (result: unknown) => JSON.stringify(result, null, 2),
+    validateResult: (result: unknown): result is EntryOperationResult => {
+      const entryResult = result as EntryOperationResult;
+      return entryResult?.status === 'fetched' && !!entryResult?.uid;
     }
   },
   {
@@ -97,8 +106,10 @@ export const crudOperations: SdkTestOperation[] = [
       
       const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
       
+      const contentTypeUid = getContentTypeUidFromContext(context, 'create-test-content-type');
+      
       const response = await stack
-        .contentType('test_content_type')
+        .contentType(contentTypeUid)
         .entry(createdEntryUid)
         .delete();
       
@@ -108,18 +119,17 @@ export const crudOperations: SdkTestOperation[] = [
       return {
         status: 'deleted',
         uid: deletedUid,
-        notice: response.notice || 'Entry deleted successfully'
+        notice: response.notice ?? 'Entry deleted successfully'
       };
     },
-    formatResult: (result: any) => JSON.stringify(result),
-    validateResult: (result: any) => {
-      return result?.status === 'deleted';
+    formatResult: (result: unknown) => JSON.stringify(result),
+    validateResult: (result: unknown): result is EntryOperationResult => {
+      const entryResult = result as EntryOperationResult;
+      return entryResult?.status === 'deleted';
     }
   },
 ];
 
-// Helper to reset stored UIDs (useful for test cleanup)
 export function resetCrudState() {
   createdEntryUid = '';
-  createdAssetUid = '';
 }

@@ -1,8 +1,10 @@
-import { SdkTestOperation } from '../../types/sdk-testing.types';
+import { 
+  SdkTestOperation, 
+  MetadataOperationResult, 
+  getContentTypeUidFromContext 
+} from '../../types/sdk-testing.types';
 
 let createdMetadataUid = '';
-
-const TEST_CONTENT_TYPE_UID = 'test_content_type';
 
 async function getOrCreateEntryUid(sdk: any, context: any): Promise<string> {
   // Try previous results from CRUD and API create-entry ops
@@ -11,25 +13,26 @@ async function getOrCreateEntryUid(sdk: any, context: any): Promise<string> {
   const uidFromPrev = prevCrud?.uid || prevApi?.uid;
   if (uidFromPrev) return uidFromPrev;
 
-  // Fallback: create an entry in test_content_type
+  const contentTypeUid = getContentTypeUidFromContext(context, 'create-test-content-type');
+
   const entryData = { title: `Meta Entry ${Date.now()}`, description: 'Auto-created for metadata tests' };
   if (context?.cmsInstance && context?.stackApiKey) {
     const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
     const response = await stack
-      .contentType(TEST_CONTENT_TYPE_UID)
+      .contentType(contentTypeUid)
       .entry()
       .create({ entry: entryData });
-    return response?.uid || response?.entry?.uid || '';
+    return response?.uid ?? response?.entry?.uid ?? '';
   }
 
   // As last resort, try sdk.api
-  const res: any = await sdk.api(`${sdk.endpoints.CMA}/v3/content_types/${TEST_CONTENT_TYPE_UID}/entries`, {
+  const res = await sdk.api(`${sdk.endpoints.CMA}/v3/content_types/${contentTypeUid}/entries`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ entry: entryData })
   });
   const json = await res.json().catch(() => ({}));
-  return json?.entry?.uid || '';
+  return json?.entry?.uid ?? '';
 }
 
 export const metadataOperations: SdkTestOperation[] = [
@@ -44,18 +47,24 @@ export const metadataOperations: SdkTestOperation[] = [
       const entryUid = await getOrCreateEntryUid(sdk, context);
       if (!entryUid) throw new Error('No entry UID available.');
 
+      const createResult = context?.previousResults?.['create-test-content-type'] as any;
+      const contentTypeUid = createResult?.contentTypeUid || createResult?.uid || 'test_content_type';
+
       const res = await sdk.metadata.createMetaData({
         entity_uid: entryUid,
-        _content_type_uid: TEST_CONTENT_TYPE_UID,
+        _content_type_uid: contentTypeUid,
         type: 'entry',
         extension_uid: sdk.ids.locationUID,
         tag: 'e2e-test'
       });
-      createdMetadataUid = res?.metadata?.uid || '';
+      createdMetadataUid = res?.metadata?.uid ?? '';
       return { status: 'created', uid: createdMetadataUid };
     },
     formatResult: (r: unknown) => JSON.stringify(r),
-    validateResult: (r: any) => r?.status === 'created' && !!r?.uid
+    validateResult: (r: unknown): r is MetadataOperationResult => {
+      const result = r as MetadataOperationResult;
+      return result?.status === 'created' && !!result?.uid;
+    }
   },
   {
     id: 'sdk-meta-get',
@@ -71,7 +80,10 @@ export const metadataOperations: SdkTestOperation[] = [
       return { status: 'fetched', uid: res?.metadata?.uid };
     },
     formatResult: (r: unknown) => JSON.stringify(r),
-    validateResult: (r: any) => r?.status === 'fetched' && r?.uid === createdMetadataUid
+    validateResult: (r: unknown): r is MetadataOperationResult => {
+      const result = r as MetadataOperationResult;
+      return result?.status === 'fetched' && result?.uid === createdMetadataUid;
+    }
   },
   {
     id: 'sdk-meta-list',
@@ -87,7 +99,10 @@ export const metadataOperations: SdkTestOperation[] = [
       return { count: Array.isArray(items) ? items.length : 0 };
     },
     formatResult: (r: unknown) => JSON.stringify(r),
-    validateResult: (r: any) => typeof r?.count === 'number'
+    validateResult: (r: unknown) => {
+      const result = r as { count?: number };
+      return typeof result?.count === 'number';
+    }
   },
   {
     id: 'sdk-meta-update',
@@ -106,7 +121,10 @@ export const metadataOperations: SdkTestOperation[] = [
       return { status: 'updated', uid: res?.metadata?.uid };
     },
     formatResult: (r: unknown) => JSON.stringify(r),
-    validateResult: (r: any) => r?.status === 'updated' && r?.uid === createdMetadataUid
+    validateResult: (r: unknown): r is MetadataOperationResult => {
+      const result = r as MetadataOperationResult;
+      return result?.status === 'updated' && result?.uid === createdMetadataUid;
+    }
   },
   {
     id: 'sdk-meta-delete',
@@ -124,7 +142,10 @@ export const metadataOperations: SdkTestOperation[] = [
       return { status: 'deleted', uid, notice: res?.notice };
     },
     formatResult: (r: unknown) => JSON.stringify(r),
-    validateResult: (r: any) => r?.status === 'deleted'
+    validateResult: (r: unknown): r is MetadataOperationResult => {
+      const result = r as MetadataOperationResult;
+      return result?.status === 'deleted';
+    }
   },
   {
     id: 'sdk-meta-get-unknown',
