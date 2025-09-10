@@ -1,84 +1,40 @@
-import React, { useCallback, useState, useEffect } from "react";
-import localeTexts from "../../common/locales/en-us/index";
-import parse from "html-react-parser";
-import { useAppConfig } from "../../common/hooks/useAppConfig";
+import React from "react";
 import "../index.css";
 import "./EntrySidebar.css";
-import Icon from "../../assets/Entry-Sidebar-Logo.svg";
-import ReadOnly from "../../assets/lock.svg";
-import JsonView from "../../assets/JsonView.svg";
-import ConfigModal from "../../components/ConfigModal/ConfigModal";
 import { useAppSdk } from "../../common/hooks/useAppSdk";
-import { useExtensionEvents } from "../../common/hooks/useExtensionEvents";
-import { TestTableComponent } from "../../components/Table";
-import StatusPill from "../../components/Table/StatusPill";
+import { SDK_TEST_CATEGORIES } from "../../services/sdk-operations";
+import { SdkTestCards } from "../../components/SdkTestCards/SdkTestCards";
+import { useSdkTesting } from "../../hooks/useSdkTesting";
 
 const EntrySidebarExtension = () => {
-  const appConfig = useAppConfig();
-  const appSDK = useAppSdk();
-
-  const customFieldEvent = useExtensionEvents();
-  const [localState, setLocalState] = useState(customFieldEvent);
-
-  useEffect(() => {
-    appSDK?.location.SidebarWidget?.entry.onChange((data) => {
-      console.log("SidebarWidget onChange", data);
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onChange') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-    appSDK?.location.SidebarWidget?.entry.onSave((data) => {
-      console.log("SidebarWidget onSave", data);
-
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onSave') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-    appSDK?.location.SidebarWidget?.entry.onPublish((data) => {
-      console.log("SidebarWidget onPublish", data);
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onPublish') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-    appSDK?.location.SidebarWidget?.entry.onUnPublish((data) => {
-      console.log("SidebarWidget onUnPublish", data);
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onUnPublish') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-  }, [])
-
+  const appSdk = useAppSdk();
+  const { state, executeOperation, getFormattedResult, isReady } = useSdkTesting();
   return (
-    <div className="layout-container">
-      <div className="ui-location-wrapper">
-        <div className="ui-location">
-          <TestTableComponent initEventData={customFieldEvent} updatedEventData={localState} />
-        </div>
+    <div style={{ padding: 12, maxWidth: 420 }}>
+    <h2 data-test-id="esb-sidebar-rail-title" style={{ margin: 0 }}>Entry Sidebar Rail App</h2>
+      <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
+        <div>App UID: {appSdk?.appUID || '-'}</div>
+        <div>Installation UID: {appSdk?.installationUID || '-'}</div>
+        <div>Location UID: {appSdk?.locationUID || '-'}</div>
       </div>
+      {isReady && (
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SdkTestCards
+          title={SDK_TEST_CATEGORIES.CORE.name}
+          operations={SDK_TEST_CATEGORIES.CORE.operations}
+          results={state.results}
+          onExecute={executeOperation}
+          getFormattedResult={getFormattedResult}
+        />
+        <SdkTestCards
+          title={SDK_TEST_CATEGORIES.CREATE_ESB.name}
+          operations={SDK_TEST_CATEGORIES.CREATE_ESB.operations}
+          results={state.results}
+          onExecute={executeOperation}
+          getFormattedResult={getFormattedResult}
+        />
+        </div>
+      )}
     </div>
   );
 };

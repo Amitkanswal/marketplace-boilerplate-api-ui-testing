@@ -8,6 +8,7 @@ import { storeOperations } from './store-operations';
 import { metadataOperations } from './metadata-operations';
 import { ctsOperations } from './cts-operations';
 import { esbOperations } from './esb-operations';
+import { createEsbOperations } from './create-esb-operations';
 
 /**
  * Get all SDK test operations
@@ -96,6 +97,12 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'ESB Operations',
     description: 'ESB operations',
     operations: esbOperations
+  },
+  CREATE_ESB: {
+    id: 'create-esb',
+    name: 'Create ESB Operations',
+    description: 'Create ESB operations',
+    operations: createEsbOperations
   }
 };
 

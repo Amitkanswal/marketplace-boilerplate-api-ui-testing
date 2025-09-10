@@ -42,7 +42,7 @@ function App() {
             }
           />
           <Route
-            path="/entry-sidebar"
+            path="/entry-sidebar-rail"
             element={
               <Suspense>
                 <EntrySidebarExtensionProvider>
