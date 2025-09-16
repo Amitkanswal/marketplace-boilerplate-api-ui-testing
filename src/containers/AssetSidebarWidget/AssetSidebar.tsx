@@ -1,64 +1,45 @@
-import React, { useCallback, useState } from "react";
-import localeTexts from "../../common/locales/en-us/index";
-import parse from "html-react-parser";
-import { useAppConfig } from "../../common/hooks/useAppConfig";
-import "../index.css";
+import React, { useEffect } from "react";
+import { useAppSdk } from "../../common/hooks/useAppSdk";
+import { SdkTestCards } from "../../components/SdkTestCards/SdkTestCards";
+import { useSdkTesting } from "../../hooks/useSdkTesting";
+import { SDK_TEST_CATEGORIES } from "../../services/sdk-operations";
 import "./AssetSidebar.css";
-import Icon from "../../assets/Asset-Sidebar-Logo.svg";
-import ReadOnly from "../../assets/lock.svg";
-import JsonView from "../../assets/JsonView.svg";
-import ConfigModal from "../../components/ConfigModal/ConfigModal";
+import { registerCallbacks } from "../../services/sdk-operations/asb-operations";
+import UiLocation from "@contentstack/app-sdk/dist/src/uiLocation";
 
-const AssetSidebarExtension = () => {
-  const appConfig = useAppConfig();
-
-  const [isRawConfigModalOpen, setRawConfigModalOpen] = useState<boolean>(false);
-
-  const handleViewRawConfig = useCallback(() => {
-    setRawConfigModalOpen(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setRawConfigModalOpen(false);
-  }, []);
-
-  const sampleAppConfig = appConfig?.["sample_app_configuration"] || "";
-  const trimmedSampleAppConfig =
-    sampleAppConfig.length > 13 ? `${sampleAppConfig.substring(0, 13)}...` : sampleAppConfig;
+const AssetSidebarExtension: React.FC = () => {
+  const appSdk = useAppSdk();
+  const { state, executeOperation, getFormattedResult } = useSdkTesting();
+  useEffect(() => {
+    registerCallbacks(appSdk as UiLocation);
+  }, [appSdk]);
 
   return (
-    <div className="layout-container">
-      <div className="ui-location-wrapper">
-        <div className="ui-location">
-          <div className="ui-container">
-            <div className="logo-container">
-              <img src={Icon} alt="Logo" />
-              <p>{localeTexts.AssetSidebarWidget.title}</p>
-            </div>
-            <div className="config-container">
-              <div className="label-container">
-                <p className="label">Sample App Configuration</p>
-                <p className="info">(read only)</p>
-              </div>
-              <div className="input-wrapper">
-                <div className="input-container">
-                  <p className="config-value">{trimmedSampleAppConfig}</p>
-                  <img src={ReadOnly} alt="ReadOnlyLogo" />
-                </div>
-
-                <img src={JsonView} alt="Show-Json-CTA" className="show-json-cta" onClick={handleViewRawConfig} />
-                {isRawConfigModalOpen && appConfig && <ConfigModal config={appConfig} onClose={handleCloseModal} />}
-              </div>
-            </div>
-            <div className="location-description">
-              <p className="location-description-text">{parse(localeTexts.AssetSidebarWidget.body)}</p>
-              <a target="_blank" rel="noreferrer" href={localeTexts.AssetSidebarWidget.button.url}>
-                <span className="location-description-link">{localeTexts.AssetSidebarWidget.button.text}</span>
-              </a>
-            </div>
-          </div>
-        </div>
+    <div style={{ padding: 12, maxWidth: 420, display: "flex", flexDirection: "column", gap: 16 }}>
+      <h2 data-test-id="asb-asset-sidebar-title" style={{ margin: 0 }}>
+        Asset Sidebar App
+      </h2>
+      <div style={{ marginTop: 8, fontSize: 12, color: "#555" }}>
+        <div>App UID: {appSdk?.appUID || "-"}</div>
+        <div>Installation UID: {appSdk?.installationUID || "-"}</div>
+        <div>Location UID: {appSdk?.locationUID || "-"}</div>
       </div>
+      
+      <SdkTestCards
+        title={SDK_TEST_CATEGORIES.CORE.name}
+        operations={SDK_TEST_CATEGORIES.CORE.operations}
+        results={state.results}
+        onExecute={executeOperation}
+        getFormattedResult={getFormattedResult}
+      />
+      
+      <SdkTestCards
+        title={SDK_TEST_CATEGORIES.ASB.name}
+        operations={SDK_TEST_CATEGORIES.ASB.operations}
+        results={state.results}
+        onExecute={executeOperation}
+        getFormattedResult={getFormattedResult}
+      />
     </div>
   );
 };

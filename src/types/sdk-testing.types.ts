@@ -2,7 +2,7 @@ import UiLocation from '@contentstack/app-sdk/dist/src/uiLocation';
 import { ContentstackClient } from '@contentstack/management';
 
 export type TestStatus = 'idle' | 'loading' | 'success' | 'error';
-export type TestCategory = 'core' | 'cma' | 'frame' | 'crud' | 'api' | 'store' | 'metadata' | 'cts' | 'esb' | 'create-esb';
+export type TestCategory = 'core' | 'cma' | 'frame' | 'crud' | 'api' | 'store' | 'metadata' | 'cts' | 'esb' | 'create-esb' | 'asb';
 
 export interface SdkTestResult {
   status: TestStatus;
@@ -15,7 +15,7 @@ export interface SdkTestOperation {
   id: string;
   name: string;
   description: string;
-  category: TestCategory;
+  category?: TestCategory;
   testId: string;
   resultTestId: string;
   execute: (sdk: UiLocation, context?: SdkTestContext) => Promise<unknown>;
