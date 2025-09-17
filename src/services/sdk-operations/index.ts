@@ -9,35 +9,8 @@ import { metadataOperations } from './metadata-operations';
 import { ctsOperations } from './cts-operations';
 import { esbOperations } from './esb-operations';
 import { createEsbOperations } from './create-esb-operations';
+import { asbOperations } from './asb-operations';
 
-/**
- * Get all SDK test operations
- */
-export function getAllOperations(): SdkTestOperation[] {
-  return [
-    ...coreSdkOperations,
-    ...cmaOperations,
-    ...frameOperations,
-    ...crudOperations,
-    ...apiOperations,
-    ...storeOperations,
-    ...metadataOperations
-  ];
-}
-
-/**
- * Get operations by category
- */
-export function getOperationsByCategory(category: string): SdkTestOperation[] {
-  return getAllOperations().filter(op => op.category === category);
-}
-
-/**
- * Get operation by ID
- */
-export function getOperationById(id: string): SdkTestOperation | undefined {
-  return getAllOperations().find(op => op.id === id);
-}
 
 /**
  * SDK test categories configuration
@@ -103,6 +76,12 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'Create ESB Operations',
     description: 'Create ESB operations',
     operations: createEsbOperations
+  },
+  ASB: {
+    id: 'asb',
+    name: 'ASB Operations',
+    description: 'Asset Sidebar operations',
+    operations: asbOperations
   }
 };
 
