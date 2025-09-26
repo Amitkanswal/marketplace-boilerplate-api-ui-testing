@@ -10,6 +10,7 @@ import { ctsOperations } from './cts-operations';
 import { esbOperations } from './esb-operations';
 import { createEsbOperations } from './create-esb-operations';
 import { asbOperations } from './asb-operations';
+import { cfOperations } from './cf-operations';
 
 
 /**
@@ -82,6 +83,12 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'ASB Operations',
     description: 'Asset Sidebar operations',
     operations: asbOperations
+  },
+  CF: {
+    id: 'cf',
+    name: 'CF Operations',
+    description: 'Custom Field operations',
+    operations: cfOperations
   }
 };
 
