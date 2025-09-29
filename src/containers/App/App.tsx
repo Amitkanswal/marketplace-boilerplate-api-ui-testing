@@ -24,6 +24,7 @@ const StackDashboardExtension = React.lazy(() => import("../DashboardWidget/Stac
 const FullPageExtension = React.lazy(() => import("../FullPage/FullPage"));
 const PageNotFound = React.lazy(() => import("../404/404"));
 const DefaultPage = React.lazy(() => import("../index"));
+const AssetSidebarRail = React.lazy(() => import("../AssetSidebarRail/AssetSidebarRail"));
 
 function App() {
   return (
@@ -82,6 +83,14 @@ function App() {
             element={
               <Suspense>
                 <AssetSidebarExtension />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/asset-sidebar-rail"
+            element={
+              <Suspense>
+                <AssetSidebarRail />
               </Suspense>
             }
           />
