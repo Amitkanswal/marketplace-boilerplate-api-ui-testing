@@ -12,7 +12,7 @@ export const apiOperations: SdkTestOperation[] = [
     testId: 'sdk-api-list-cts',
     resultTestId: 'sdk-api-list-cts-result',
     execute: async (sdk) => {
-      const res = await sdk.api(`${sdk.endpoints.CMA}/v3/content_types?limit=1`, {
+      const res = await sdk.api(`${sdk.endpoints?.CMA}/v3/content_types?limit=1`, {
         method: 'GET',
       });
       if (!res.ok) {

@@ -1,4 +1,4 @@
-import { SdkTestOperation, SdkTestCategory } from '../../types/sdk-testing.types';
+import { SdkTestCategory } from '../../types/sdk-testing.types';
 import { coreSdkOperations } from './core-operations';
 import { cmaOperations } from './cma-operations';
 import { frameOperations, canUseFrameOperations } from './frame-operations';
@@ -11,6 +11,8 @@ import { esbOperations } from './esb-operations';
 import { createEsbOperations } from './create-esb-operations';
 import { asbOperations } from './asb-operations';
 import { cfOperations } from './cf-operations';
+import { appConfigOperations } from './app-config-operations';
+import { fieldModifierOperations } from './field-modifier-operations';
 
 
 /**
@@ -89,6 +91,18 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'CF Operations',
     description: 'Custom Field operations',
     operations: cfOperations
+  },
+  APP_CONFIG: {
+    id: 'app-config',
+    name: 'App Config Operations',
+    description: 'App Config operations',
+    operations: appConfigOperations
+  },
+  FIELD_MODIFIER: {
+    id: 'field-modifier',
+    name: 'Field Modifier Operations',
+    description: 'Field Modifier location operations',
+    operations: fieldModifierOperations
   }
 };
 

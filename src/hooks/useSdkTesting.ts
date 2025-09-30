@@ -99,7 +99,7 @@ export function useSdkTesting() {
     
     return client({
       adapter: appSdk.createAdapter(),
-      baseURL: `${appSdk.endpoints.CMA}/v3`,
+      baseURL: `${appSdk.endpoints?.CMA}/v3`,
       headers: {
         'Content-Type': 'application/json',
       }
