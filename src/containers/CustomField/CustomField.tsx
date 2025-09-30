@@ -1,80 +1,47 @@
 import React, { useEffect, useState } from "react";
-import { useAppConfig } from "../../common/hooks/useAppConfig";
-import { useAppSdk } from '../../common/hooks/useAppSdk';
-import { TestTableComponent } from '../../components/Table';
-import { useExtensionEvents } from '../../common/hooks/useExtensionEvents';
-import StatusPill from '../../components/Table/StatusPill';
+import { useAppSdk } from "../../common/hooks/useAppSdk";
 import "../index.css";
 import "./CustomField.css";
+import { SdkTestTable } from "../../components/SdkTestTable";
+import { SDK_TEST_CATEGORIES } from "../../services/sdk-operations";
+import { useSdkTesting } from "../../hooks/useSdkTesting";
+import UiLocation from "@contentstack/app-sdk/dist/src/uiLocation";
+import { registerCallbacks } from "../../services/sdk-operations/cf-operations";
 
 const CustomFieldExtension = () => {
-  const appSDK = useAppSdk();
+  const appSdk = useAppSdk();
 
-  const customFieldEvent = useExtensionEvents();
-  const [localState, setLocalState] = useState(customFieldEvent);
+  const { state, executeOperation, getFormattedResult } = useSdkTesting();
 
   useEffect(() => {
-    
-    appSDK?.location.CustomField?.entry.onChange((data) => {
-      console.log("CustomField onChange", data);
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onChange') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-    appSDK?.location.CustomField?.entry.onSave((data) => {
-      console.log("CustomField onSave", data);
-  
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onSave') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-    appSDK?.location.CustomField?.entry.onPublish((data) => {
-      console.log("CustomField onPublish", data);
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onPublish') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-    appSDK?.location.CustomField?.entry.onUnPublish((data) => {
-      console.log("CustomField onUnPublish", data);
-      setLocalState((prev) => {
-        return prev.map((item) => {
-          if (item.eventName === 'onUnPublish') {
-            return { ...item, status: <StatusPill status="done" /> }
-          }
-          return item
-        })
-      })
-    });
-
-  }, [])
+    registerCallbacks(appSdk as UiLocation);
+  }, [appSdk]);
 
   return (
-    <div className="layout-container">
-      <div className="ui-location-wrapper">
-        <div className="ui-location">
-          <TestTableComponent initEventData={customFieldEvent} updatedEventData={localState}/>
-        </div>
+    <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 16 }}>
+      <h2 data-test-id="asb-asset-sidebar-title" style={{ margin: 0 }}>
+        Custom Field App
+      </h2>
+      <div style={{ marginTop: 8, fontSize: 12, color: "#555" }}>
+        <div>App UID: {appSdk?.appUID || "-"}</div>
+        <div>Installation UID: {appSdk?.installationUID || "-"}</div>
+        <div>Location UID: {appSdk?.locationUID || "-"}</div>
       </div>
+      <SdkTestTable
+        title={SDK_TEST_CATEGORIES.CORE.name}
+        operations={SDK_TEST_CATEGORIES.CORE.operations}
+        results={state.results}
+        onExecute={executeOperation}
+        getFormattedResult={getFormattedResult}
+      />
+      <SdkTestTable
+        title={SDK_TEST_CATEGORIES.CF.name}
+        operations={SDK_TEST_CATEGORIES.CF.operations}
+        results={state.results}
+        onExecute={executeOperation}
+        getFormattedResult={getFormattedResult}
+      />
     </div>
   );
 };
-
 export default CustomFieldExtension;
