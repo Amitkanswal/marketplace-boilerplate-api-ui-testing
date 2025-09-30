@@ -16,8 +16,9 @@ export const AppConfigurationExtensionProvider = ({ children }: ChildProp) => {
   const { location } = useAppLocation();
 
   useEffect(() => {
-    if (location && !("installation" in location)) return;
-    location?.installation
+    if (!location || !("installation" in location)) return;
+    
+    location.installation
       .getInstallationData()
       .then((data: InstallationData) => {
         setInstallation(data);
@@ -25,8 +26,9 @@ export const AppConfigurationExtensionProvider = ({ children }: ChildProp) => {
       })
       .catch((err: Error) => {
         console.error(err);
+        setLoading(false);
       });
-  }, [installationData, location, setLoading, setInstallation]);
+  }, [location]); // Only re-fetch when location changes
 
   const setInstallationData = useCallback(
     async (data: {
@@ -37,12 +39,12 @@ export const AppConfigurationExtensionProvider = ({ children }: ChildProp) => {
         configuration: { ...installationData.configuration, ...data.configuration },
         serverConfiguration: { ...installationData.serverConfiguration, ...data.serverConfiguration },
       };
-      if (location && !("installation" in location)) return;
-      await location?.installation.setInstallationData(newInstallationData);
+      if (!location || !("installation" in location)) return;
+      await location.installation.setInstallationData(newInstallationData);
       setInstallation(newInstallationData);
       setLoading(false);
     },
-    [location, setInstallation, setLoading]
+    [location, installationData]
   );
 
   return (
