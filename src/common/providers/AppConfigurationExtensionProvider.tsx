@@ -51,6 +51,7 @@ export const AppConfigurationExtensionProvider = ({ children }: ChildProp) => {
     <AppConfigurationExtensionContext.Provider
       value={{ installationData, setInstallationData, loading }}>
       {children}
+      
     </AppConfigurationExtensionContext.Provider>
   );
 };
