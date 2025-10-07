@@ -13,6 +13,7 @@ import { asbOperations } from './asb-operations';
 import { cfOperations } from './cf-operations';
 import { appConfigOperations } from './app-config-operations';
 import { fieldModifierOperations } from './field-modifier-operations';
+import { dashboardOperations } from './dashboard-operations';
 
 
 /**
@@ -103,6 +104,12 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'Field Modifier Operations',
     description: 'Field Modifier location operations',
     operations: fieldModifierOperations
+  },
+  DASHBOARD: {
+    id: 'dashboard',
+    name: 'Dashboard Operations',
+    description: 'Dashboard operations',
+    operations: dashboardOperations
   }
 };
 
