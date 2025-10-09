@@ -14,6 +14,7 @@ import { cfOperations } from './cf-operations';
 import { appConfigOperations } from './app-config-operations';
 import { fieldModifierOperations } from './field-modifier-operations';
 import { dashboardOperations } from './dashboard-operations';
+import { globalFullPageOperations } from './global-full-page-operations';
 
 
 /**
@@ -110,6 +111,12 @@ export const SDK_TEST_CATEGORIES: Record<string, SdkTestCategory> = {
     name: 'Dashboard Operations',
     description: 'Dashboard operations',
     operations: dashboardOperations
+  },
+  GLOBAL_FULL_PAGE: {
+    id: 'global-full-page',
+    name: 'Global Full Page Operations',
+    description: 'Cross-stack global full page operations',
+    operations: globalFullPageOperations
   }
 };
 
