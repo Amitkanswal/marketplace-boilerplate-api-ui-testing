@@ -140,6 +140,38 @@ export const cmaOperations: SdkTestOperation[] = [
     }
   },
   {
+    id: 'list-content-types-with-count',
+    name: 'List Content Types with Include Count',
+    description: 'Retrieve content types with include_count parameter to verify count field in response',
+    category: 'cma',
+    testId: 'sdk-cma-list-content-types-with-count',
+    resultTestId: 'sdk-cma-count-result',
+    execute: async (sdk, context) => {
+      if (!context?.cmsInstance || !context?.stackApiKey) {
+        throw new Error('CMS instance or API key not available');
+      }
+      
+      const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
+      const response = await stack.contentType().query({include_count: true}).find();
+      const items = response?.items || [];
+      const count = response?.count;
+      
+      return { 
+        itemsCount: items.length,
+        totalCount: count,
+        hasCountField: typeof count === 'number'
+      };
+    },
+    formatResult: (result: unknown) => JSON.stringify(result),
+    validateResult: (result: any) => {
+      return result && 
+             typeof result.itemsCount === 'number' && 
+             typeof result.totalCount === 'number' &&
+             result.hasCountField === true &&
+             result.totalCount >= result.itemsCount;
+    }
+  },
+  {
     id: 'fetch-nonexistent-entry',
     name: 'Fetch Non-existent Entry',
     description: 'Test error handling by fetching a non-existent entry',
