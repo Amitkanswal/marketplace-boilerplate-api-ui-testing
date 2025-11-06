@@ -1,4 +1,10 @@
-import { SdkTestOperation, TestCategory } from '../../types/sdk-testing.types';
+import { 
+  SdkTestOperation, 
+  TestCategory, 
+  ContentTypeOperationResult, 
+  ApiErrorResponse, 
+  WorkerInfo 
+} from '../../types/sdk-testing.types';
 import UiLocation from '@contentstack/app-sdk/dist/src/uiLocation';
 
 let lastChangedFieldData: any = null;
@@ -198,6 +204,82 @@ export const cfOperations: SdkTestOperation[] = [
     },
     formatResult: (result: unknown) => JSON.stringify(result, null, 2),
     validateResult: (result: any) => result?.status === 'success',
+  },
+  {
+    id: 'cf-create-content-type',
+    name: 'Create Content Type (CMA)',
+    description: 'Create content type using CMA from Custom Field location',
+    category: 'cf' as TestCategory,
+    testId: 'sdk-cf-create-content-type',
+    resultTestId: 'sdk-cf-create-content-type-result',
+    execute: async (sdk, context) => {
+      if (!context?.cmsInstance || !context?.stackApiKey) {
+        throw new Error('CMS instance or API key not available');
+      }
+      
+      // Generate unique content type UID to prevent race conditions in parallel tests
+      const timestamp = Date.now();
+      const workerInfo = (globalThis as any).__playwright_worker_info as WorkerInfo | undefined;
+      const workerIndex = workerInfo?.parallelIndex ?? Math.floor(Math.random() * 1000);
+      const contentTypeUid = `test_content_type_cf_w${workerIndex}_t${timestamp}`;
+      const contentTypeTitle = `Test Content Type CF (Worker ${workerIndex})`;
+      
+      const stack = context.cmsInstance.stack({ api_key: context.stackApiKey });
+      try {
+        const ct = await stack
+          .contentType()
+          .create({
+            content_type: {
+              title: contentTypeTitle,
+              uid: contentTypeUid,
+              schema: [
+                {
+                  display_name: 'Title',
+                  uid: 'title',
+                  data_type: 'text',
+                  field_metadata: { _default: true },
+                  mandatory: true,
+                  multiple: false,
+                  unique: false,
+                },
+                {
+                  display_name: 'Description',
+                  uid: 'description',
+                  data_type: 'text',
+                  field_metadata: { _default: true },
+                  multiple: false,
+                  unique: false,
+                },
+              ],
+              options: {
+                is_page: false,
+                singleton: false,
+                title: contentTypeTitle,
+                sub_title: ['Test Content Type Description'],
+              },
+            },
+          });
+        return { status: 'created', uid: ct?.uid ?? contentTypeUid, contentTypeUid };
+      } catch (error: unknown) {
+        const apiError = (error as { data?: ApiErrorResponse })?.data ?? {};
+        const errorCode = apiError.error_code;
+        const errors = apiError.errors;
+        // Handle error code 115: validation errors with "not unique" messages
+        if (errorCode === 115 || 
+            (errors && Object.values(errors).some((err: string[]) => 
+              Array.isArray(err) && err.some(e => e.toLowerCase().includes('not unique'))
+            ))) {
+          return { status: 'exists', uid: contentTypeUid, contentTypeUid };
+        }
+        
+        throw error;
+      }
+    },
+    formatResult: (result: unknown) => JSON.stringify(result, null, 2),
+    validateResult: (result: unknown): result is ContentTypeOperationResult => {
+      const ctResult = result as ContentTypeOperationResult;
+      return !!(ctResult && (ctResult.status === 'created' || ctResult.status === 'exists'));
+    },
   },
   
 ];
