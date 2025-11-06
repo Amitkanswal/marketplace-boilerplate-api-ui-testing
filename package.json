@@ -6,7 +6,7 @@
     "dist"
   ],
   "dependencies": {
-    "@contentstack/app-sdk": "^2.3.2",
+    "@contentstack/app-sdk": "github:contentstack/app-sdk#main",
     "@contentstack/management": "^1.18.2",
     "@contentstack/venus-components": "3.0.0",
     "@types/node": "^18.19.4",
@@ -34,7 +34,11 @@
     "test:chrome": "npx playwright test --config=playwright.config.ts --project=Chromium",
     "test:firefox": "npx playwright test --config=playwright.config.ts --project=firefox",
     "test:chrome-headed": "npx playwright test --headed --config=playwright.config.ts --project=Chromium",
-    "test:firefox-headed": "npx playwright test --headed --config=playwright.config.ts --project=firefox"
+    "test:firefox-headed": "npx playwright test --headed --config=playwright.config.ts --project=firefox",
+    "install:dev": "APP_ENV=dev npm install @contentstack/app-sdk@github:contentstack/app-sdk#develop --save",
+    "install:staging": "APP_ENV=staging npm install @contentstack/app-sdk@github:contentstack/app-sdk#staging --save",
+    "install:prod": "APP_ENV=production npm install @contentstack/app-sdk@github:contentstack/app-sdk#main --save",
+    "postinstall": "node scripts/install-sdk.js || true"
   },
   "eslintConfig": {
     "extends": [
@@ -61,6 +65,7 @@
     "@testing-library/react": "^13.4.0",
     "@types/lodash": "^4.14.202",
     "ajv": "^7.2.4",
+    "dotenv": "^16.3.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "playwright": "^1.23.1",
