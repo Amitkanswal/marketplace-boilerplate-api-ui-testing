@@ -5,7 +5,7 @@ import { getAuthToken } from './e2e/utils/helper';
 
 const { EMAIL, PASSWORD }: any = process.env;
 
-async function globalSetup(config: FullConfig) {
+async function globalSetup() {
   let loginPage: LoginPage;
   const browser = await chromium.launch(
     {
