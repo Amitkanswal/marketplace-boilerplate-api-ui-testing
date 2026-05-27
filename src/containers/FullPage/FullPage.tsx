@@ -9,6 +9,7 @@ import { hydrateEntryWithAssetUid, resolveTestAssetUid } from '../SdkDataErrors/
 import { ContentTypeModule } from '../SdkDataErrors/test-runner';
 import '../index.css';
 import './FullPage.css';
+import { schema } from '../../common/cms-api/mock/content-type';
 
 const ALL_MODULES: ContentTypeModule[] = [...(allModules as unknown as ContentTypeModule[])];
 
@@ -198,21 +199,24 @@ async function ensureGlobalFieldExists(
     const err = await createRes.json().catch(() => ({}));
     throw new Error(err?.error_message || `Failed to create global field: ${globalFieldUid}`);
   }
+  const res = await createRes.json();
+  return res.global_field;
 }
 
 async function ensureReferencedGlobalFieldsExist(sdk: any, cmaBase: string, contentType: any) {
   const schema: ContentTypeSchemaField[] = Array.isArray(contentType?.schema) ? contentType.schema : [];
   const globalFields = schema.filter(f => f?.data_type === 'global_field' && typeof f?.reference_to === 'string');
-
+  const result = []
   for (const gf of globalFields) {
-    await ensureGlobalFieldExists(
+    result.push(ensureGlobalFieldExists(
       sdk,
       cmaBase,
       String(gf.reference_to),
       Array.isArray(gf.schema) ? gf.schema : [],
       typeof gf.display_name === 'string' ? gf.display_name : undefined,
-    );
+    ))
   }
+  return Promise.all(result);
 }
 
 async function deleteReferencedGlobalFields(sdk: any, cmaBase: string, contentType: any) {
@@ -292,7 +296,7 @@ const ModuleManager: React.FC = () => {
         const cmaBase = sdk.endpoints.CMA;
 
         await ensureReferencedTaxonomiesExist(sdk, cmaBase, mod.contentType);
-        await ensureReferencedGlobalFieldsExist(sdk, cmaBase, mod.contentType);
+        const globalFields = await ensureReferencedGlobalFieldsExist(sdk, cmaBase, mod.contentType);
 
         const fieldExtensionUid = await getEnabledFieldExtensionUid(sdk, cmaBase);
         const hydratedContentType = hydrateContentTypeWithExtensionUid(mod.contentType, fieldExtensionUid);
@@ -306,6 +310,21 @@ const ModuleManager: React.FC = () => {
           const err = await ctRes.json();
           throw new Error(err?.error_message || 'Failed to create content type');
         }
+          // create reference inside global field
+          if(mod.contentType.uid === 'sdk_tc_ref_in_global' && globalFields.length > 0) {
+            // create reference inside global field
+            const globalFieldRes = await sdk.api(`${cmaBase}/v3/global_fields/${globalFields[0].uid}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: {
+                global_field: { ...globalFields[0], ...(mod as any).globalFieldUpdate}
+              }
+            });
+            if (!globalFieldRes.ok) {
+              throw new Error('Failed to update global field');
+            }
+          }
+        
 
         const entryRes = await sdk.api(
           `${cmaBase}/v3/content_types/${mod.contentType.uid}/entries`,
@@ -341,7 +360,27 @@ const ModuleManager: React.FC = () => {
       try {
         const sdk = appSdk as any;
         const cmaBase = sdk.endpoints.CMA;
-
+        if(mod.contentType.uid === 'sdk_tc_ref_in_global') {
+          await sdk.api(`${cmaBase}/v3/global_fields/sdk_tc_link_card_gf`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: {
+                global_field: { schema: [
+                  {
+                    "uid": "title",
+                    "data_type": "text",
+                    "display_name": "Title",
+                    "mandatory": true,
+                    "unique": false,
+                    "field_metadata": {
+                      "_default": true
+                    },
+                    "multiple": false
+                  }
+                ]  }
+              }
+            });
+        }
         const res = await sdk.api(
           `${cmaBase}/v3/content_types/${mod.contentType.uid}`,
           { method: 'DELETE' },

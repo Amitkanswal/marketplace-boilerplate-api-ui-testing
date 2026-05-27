@@ -5,11 +5,17 @@ import customExtensionField from "./custom-extension-field.json";
 import dateField from "./date-field.json";
 import fileField from "./file-field.json";
 import globalFieldComplex from "./global-field-complex.json";
+import imageInGlobalField from "./image-in-global-field.json";
+import imageInGroup from "./image-in-group.json";
+import imageInModularBlocks from "./image-in-modular-blocks.json";
 import groupFieldComplex from "./group-field-complex.json";
 import jsonRteField from "./json-rte-field.json";
 import linkField from "./link-field.json";
 import numberField from "./number-field.json";
 import referenceField from "./reference-field.json";
+import referenceInGlobalField from "./reference-in-global-field.json";
+import referenceInGroup from "./reference-in-group.json";
+import referenceInModularBlocks from "./reference-in-modular-blocks.json";
 import selectField from "./select-field.json";
 import taxonomyField from "./taxonomy-field.json";
 import textConstrained from "./text-constrained.json";
@@ -32,8 +38,14 @@ export const allModules = [
   booleanField,
   dateField,
   fileField,
+  imageInModularBlocks,
+  imageInGroup,
+  imageInGlobalField,
   linkField,
   referenceField,
+  referenceInModularBlocks,
+  referenceInGroup,
+  referenceInGlobalField,
   selectField,
   groupFieldComplex,
   globalFieldComplex,

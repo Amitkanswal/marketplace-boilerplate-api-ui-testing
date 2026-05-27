@@ -1,0 +1,136 @@
+{
+  "id": "image_in_global_field",
+  "name": "Image Field Inside Global Field",
+  "description": "Tests setData on a file (image) field nested inside a global field. Uses dotted path author_card.photo.",
+  "contentType": {
+    "uid": "sdk_tc_image_global",
+    "title": "SDK TC - Image In Global Field",
+    "description": "Module for SDK image-in-global-field validation tests",
+    "options": {
+      "is_page": false,
+      "singleton": false,
+      "title": "title"
+    },
+    "schema": [
+      {
+        "uid": "title",
+        "data_type": "text",
+        "display_name": "Title",
+        "mandatory": true,
+        "unique": false,
+        "field_metadata": {
+          "_default": true
+        },
+        "multiple": false
+      },
+      {
+        "uid": "author_card",
+        "data_type": "global_field",
+        "display_name": "Author Card",
+        "mandatory": false,
+        "unique": false,
+        "multiple": false,
+        "reference_to": "sdk_tc_author_card_gf",
+        "schema": [
+          {
+            "uid": "name",
+            "data_type": "text",
+            "display_name": "Name",
+            "mandatory": false,
+            "unique": false,
+            "field_metadata": {},
+            "multiple": false
+          },
+          {
+            "uid": "photo",
+            "data_type": "file",
+            "display_name": "Photo",
+            "mandatory": false,
+            "unique": false,
+            "field_metadata": {},
+            "multiple": false
+          }
+        ]
+      }
+    ]
+  },
+  "baseline": {
+    "title": "SDK TC Image In Global Field Entry",
+    "author_card": {
+      "name": "Jane Doe",
+      "photo": "bltaaa111"
+    }
+  },
+  "testCases": [
+    {
+      "id": "TC-F-001",
+      "name": "author_card.photo correct image id → resolves, no onError",
+      "description": "Valid asset uid string on nested global-field file child.",
+      "operation": {
+        "type": "field-setdata",
+        "targetFieldUid": "author_card.photo",
+        "subscribeFieldOnErrorUid": "author_card.photo",
+        "data": "bltaaa111"
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-F-002",
+      "name": "author_card.photo wrong image id → throws ValidationError",
+      "description": "Non-existent asset uid. Host rejects after Zod passes.",
+      "operation": {
+        "type": "field-setdata",
+        "targetFieldUid": "author_card.photo",
+        "subscribeFieldOnErrorUid": "author_card.photo",
+        "data": "blt_invalid_fake_asset_uid_xyz"
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR"
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-F-003",
+      "name": "author_card.photo null image id → resolves, no onError",
+      "description": "null clears the nested file field.",
+      "operation": {
+        "type": "field-setdata",
+        "targetFieldUid": "author_card.photo",
+        "subscribeFieldOnErrorUid": "author_card.photo",
+        "data": null
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    }
+  ],
+  "sdkDeUiLocation": "entry-sidebar"
+}
