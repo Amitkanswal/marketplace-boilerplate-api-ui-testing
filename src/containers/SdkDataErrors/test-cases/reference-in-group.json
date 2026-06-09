@@ -165,6 +165,5 @@
       }
     }
   ],
-  "sdkDeUiLocation": "entry-sidebar",
-  "isExperimental": true
+  "sdkDeUiLocation": "entry-sidebar"
 }
