@@ -71,8 +71,8 @@
   "testCases": [
     {
       "id": "TC-F-001",
-      "name": "author_ref valid single object → resolves, no onError",
-      "description": "Valid {_content_type_uid, uid} object. Passes Zod.",
+      "name": "author_ref valid single object → threw-ValidationError, onError",
+      "description": "Valid {_content_type_uid, uid} object. Failed Zod.",
       "operation": {
         "type": "field-setdata",
         "targetFieldUid": "author_ref",
@@ -84,7 +84,10 @@
       },
       "expected": {
         "setData": {
-          "outcome": "resolved"
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR"
+          }
         },
         "fieldOnError": {
           "fired": false
@@ -123,6 +126,37 @@
     },
     {
       "id": "TC-F-003",
+      "name": "multi author_ref valid as array → resolves, no onError",
+      "description": "Array form of reference also passes Zod union.",
+      "operation": {
+        "type": "field-setdata",
+        "targetFieldUid": "author_ref",
+        "subscribeFieldOnErrorUid": "author_ref",
+        "data": [
+          {
+            "_content_type_uid": "sdk_tc_reference",
+            "uid": "self_uid"
+          },
+          {
+            "_content_type_uid": "sdk_tc_reference",
+            "uid": "self_uid"
+          }
+        ]
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-F-004",
       "name": "author_ref null → resolves, no onError",
       "description": "null clears the reference field.",
       "operation": {
@@ -144,16 +178,16 @@
       }
     },
     {
-      "id": "TC-F-004",
+      "id": "TC-F-005",
       "name": "author_ref missing uid → throws ValidationError",
       "description": "Object without 'uid' key fails Zod reference shape validation.",
       "operation": {
         "type": "field-setdata",
         "targetFieldUid": "author_ref",
         "subscribeFieldOnErrorUid": "author_ref",
-        "data": {
+        "data": [{
           "_content_type_uid": "sdk_tc_reference"
-        }
+        }]
       },
       "expected": {
         "setData": {
@@ -162,10 +196,10 @@
             "code": "VALIDATION_ERROR",
             "details": [
               {
-                "fieldUid": "author_ref",
+                "fieldUid": "author_ref.0.uid",
                 "reasons": [
                   {
-                    "message": "Reference object must contain valid _content_type_uid and uid properties"
+                    "message": "Invalid input: expected string, received undefined"
                   }
                 ]
               }
@@ -181,7 +215,7 @@
       }
     },
     {
-      "id": "TC-F-005",
+      "id": "TC-F-006",
       "name": "author_ref missing _content_type_uid → throws ValidationError",
       "description": "Object without '_content_type_uid' key fails Zod reference shape validation.",
       "operation": {
@@ -202,7 +236,7 @@
                 "fieldUid": "author_ref",
                 "reasons": [
                   {
-                    "message": "Reference object must contain valid _content_type_uid and uid properties"
+                    "message": "Invalid input: expected array, received object"
                   }
                 ]
               }
@@ -218,7 +252,7 @@
       }
     },
     {
-      "id": "TC-F-006",
+      "id": "TC-F-007",
       "name": "author_ref plain string → throws ValidationError (INVALID_TYPE)",
       "description": "String fails Zod reference union schema.",
       "operation": {
@@ -253,7 +287,7 @@
       }
     },
     {
-      "id": "TC-F-007",
+      "id": "TC-F-008",
       "name": "related_posts valid array → resolves, no onError",
       "description": "Valid array of reference objects.",
       "operation": {
@@ -280,7 +314,7 @@
       }
     },
     {
-      "id": "TC-F-008",
+      "id": "TC-F-009",
       "name": "related_posts empty array → resolves, no onError",
       "description": "Empty array is valid.",
       "operation": {
@@ -302,7 +336,7 @@
       }
     },
     {
-      "id": "TC-F-009",
+      "id": "TC-F-010",
       "name": "related_posts rejects _content_type_uid not in reference_to → ValidationError",
       "description": "Zod requires each reference’s _content_type_uid to be one of the field’s reference_to types. The second item uses a CT not allowed on related_posts, so setData throws VALIDATION_ERROR.",
       "operation": {
@@ -336,7 +370,7 @@
       }
     },
     {
-      "id": "TC-F-010",
+      "id": "TC-F-011",
       "name": "related_posts item missing uid → throws ValidationError",
       "description": "Array item without uid fails Zod reference shape.",
       "operation": {
@@ -344,6 +378,9 @@
         "targetFieldUid": "related_posts",
         "subscribeFieldOnErrorUid": "related_posts",
         "data": [
+          {
+            "_content_type_uid": "sdk_tc_reference"
+          },
           {
             "_content_type_uid": "sdk_tc_reference"
           }
@@ -356,10 +393,10 @@
             "code": "VALIDATION_ERROR",
             "details": [
               {
-                "fieldUid": "related_posts",
+                "fieldUid": "related_posts.1.uid",
                 "reasons": [
                   {
-                    "message": "Reference object must contain valid _content_type_uid and uid properties"
+                    "message": "Invalid input: expected string, received undefined"
                   }
                 ]
               }
