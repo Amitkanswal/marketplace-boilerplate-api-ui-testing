@@ -3,6 +3,10 @@ import allFieldsComplex from "./all-fields-complex.json";
 import booleanField from "./boolean-field.json";
 import customExtensionField from "./custom-extension-field.json";
 import dateField from "./date-field.json";
+import extensionFieldInGroup from "./extension-field-in-group.json";
+import extensionFieldInModularBlocks from "./extension-field-in-modular-blocks.json";
+import fieldModifierSetdata from "./field-modifier-setdata.json";
+import fieldModifierSetdataInGroup from "./field-modifier-setdata-in-group.json";
 import fileField from "./file-field.json";
 import globalFieldComplex from "./global-field-complex.json";
 import groupFieldComplex from "./group-field-complex.json";
@@ -38,6 +42,10 @@ export const allModules = [
   groupFieldComplex,
   globalFieldComplex,
   customExtensionField,
+  extensionFieldInGroup,
+  extensionFieldInModularBlocks,
+  fieldModifierSetdata,
+  fieldModifierSetdataInGroup,
   taxonomyField,
   jsonRteField,
   allFieldsComplex,

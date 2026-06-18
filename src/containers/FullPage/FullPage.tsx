@@ -72,19 +72,36 @@ async function getEnabledFieldExtensionUid(sdk: any, cmaBase: string): Promise<s
   return uid;
 }
 
-function hydrateContentTypeWithExtensionUid(contentType: any, extensionUid: string) {
-  if (!extensionUid) return contentType;
-  const schema: ContentTypeSchemaField[] = Array.isArray(contentType?.schema) ? contentType.schema : [];
-
-  const nextSchema = schema.map((f) => {
+function hydrateSchemaWithExtensionUid(
+  schema: ContentTypeSchemaField[],
+  extensionUid: string,
+): ContentTypeSchemaField[] {
+  return schema.map((f) => {
     const fm = (f as any)?.field_metadata;
     if (fm && typeof fm === 'object' && fm.extension === true) {
       return { ...f, extension_uid: extensionUid };
     }
+    // Recurse into group fields
+    if (f.data_type === 'group' && Array.isArray(f.schema)) {
+      return { ...f, schema: hydrateSchemaWithExtensionUid(f.schema, extensionUid) };
+    }
+    // Recurse into each block's schema inside modular blocks
+    if (f.data_type === 'blocks' && Array.isArray((f as any).blocks)) {
+      const hydratedBlocks = (f as any).blocks.map((block: any) =>
+        Array.isArray(block.schema)
+          ? { ...block, schema: hydrateSchemaWithExtensionUid(block.schema, extensionUid) }
+          : block,
+      );
+      return { ...f, blocks: hydratedBlocks };
+    }
     return f;
   });
+}
 
-  return { ...contentType, schema: nextSchema };
+function hydrateContentTypeWithExtensionUid(contentType: any, extensionUid: string) {
+  if (!extensionUid) return contentType;
+  const schema: ContentTypeSchemaField[] = Array.isArray(contentType?.schema) ? contentType.schema : [];
+  return { ...contentType, schema: hydrateSchemaWithExtensionUid(schema, extensionUid) };
 }
 
 async function ensureTaxonomyExists(sdk: any, cmaBase: string, taxonomyUid: string) {
