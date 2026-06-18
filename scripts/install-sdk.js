@@ -1,33 +1,34 @@
 /* eslint-env node */
-const { execSync } = require('child_process');
-const path = require('path');
+const { execSync } = require("child_process");
+const path = require("path");
 
 // Load .env file if it exists (dotenv will not override existing env vars)
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+require("dotenv").config({ path: path.resolve(__dirname, "..", ".env") });
 
+if (process.env.INGORE_POST_INSTALL == "true") return;
 // Get environment from NODE_ENV or APP_ENV, default to 'production'
-const env = (process.env.NODE_ENV || process.env.APP_ENV || 'production').toLowerCase();
+const env = (process.env.NODE_ENV || process.env.APP_ENV || "production").toLowerCase();
 
 // Map environment to GitHub branch
 const branchMap = {
-  'development': 'develop',
-  'dev': 'develop',
-  'staging': 'staging',
-  'stag': 'staging',
-  'production': 'main',
-  'prod': 'main'
+  development: "develop",
+  dev: "develop",
+  staging: "staging",
+  stag: "staging",
+  production: "main",
+  prod: "main",
 };
 
-const branch = branchMap[env] || 'main';
+const branch = branchMap[env] || "main";
 const githubUrl = `github:contentstack/app-sdk#${branch}`;
 
 console.log(`\n📦 Installing @contentstack/app-sdk from ${branch} branch (env: ${env})...`);
 
 try {
   // Install the specific branch from GitHub
-  execSync(`npm install @contentstack/app-sdk@${githubUrl} --save --no-package-lock-update`, { 
-    stdio: 'inherit',
-    cwd: path.resolve(__dirname, '..')
+  execSync(`npm install @contentstack/app-sdk@${githubUrl} --save`, {
+    stdio: "inherit",
+    cwd: path.resolve(__dirname, ".."),
   });
   console.log(`✅ Successfully installed @contentstack/app-sdk from ${branch} branch\n`);
 } catch (error) {
@@ -36,4 +37,3 @@ try {
   // Don't throw error to prevent breaking the install process
   process.exit(0);
 }
-
