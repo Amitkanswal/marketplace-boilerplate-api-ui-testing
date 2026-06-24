@@ -32,7 +32,7 @@ const FullPageExtension: React.FC = () => {
   // Memoize cmsInstance to prevent it from changing on every render
   const cmsInstance = useMemo(() => {
     return client({
-      adapter: appSdk?.createAdapter(),
+      adapter: appSdk?.createAdapter() as any,
       baseURL:appSdk?.endpoints.CMA+"/v3",
       headers:{
         "Content-Type":"application/json",

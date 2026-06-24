@@ -1,0 +1,240 @@
+{
+  "id": "extension_field_in_group",
+  "name": "Extension Field Inside Group",
+  "description": "Tests setData called directly on location.CustomField.field for the JSON extension_field embedded inside a settings group. Validates Zod union(array, record) enforcement: objects and arrays resolve; string, number, and boolean primitives throw; null clears the field.",
+  "contentType": {
+    "uid": "sdk_tc_ext_in_group",
+    "title": "SDK TC - Extension Field In Group",
+    "description": "Content type with a group containing a JSON extension field for setData validation tests",
+    "options": {
+      "is_page": false,
+      "singleton": false,
+      "title": "title"
+    },
+    "schema": [
+      {
+        "uid": "title",
+        "data_type": "text",
+        "display_name": "Title",
+        "mandatory": true,
+        "unique": false,
+        "field_metadata": {
+          "_default": true
+        },
+        "multiple": false
+      },
+      {
+        "uid": "settings",
+        "data_type": "group",
+        "display_name": "Settings",
+        "mandatory": false,
+        "unique": false,
+        "multiple": false,
+        "schema": [
+          {
+            "uid": "label",
+            "data_type": "text",
+            "display_name": "Label",
+            "mandatory": false,
+            "unique": false,
+            "field_metadata": {},
+            "multiple": false,
+            "min": 3
+          },
+          {
+            "uid": "extension_field",
+            "data_type": "json",
+            "display_name": "Extension Field",
+            "mandatory": false,
+            "unique": false,
+            "field_metadata": {
+              "extension": true,
+              "allow_json_rte": false
+            },
+            "multiple": false
+          }
+        ]
+      }
+    ]
+  },
+  "baseline": {
+    "title": "SDK TC Extension In Group Entry",
+    "settings": {
+      "label": "My Widget",
+      "extension_field": {
+        "theme": "dark",
+        "size": "lg"
+      }
+    }
+  },
+  "testCases": [
+    {
+      "id": "TC-G-001",
+      "name": "Custom Field setData: valid object → resolves, no onError",
+      "description": "Calls setData directly on location.CustomField.field with a plain object. Passes Zod union(array, record).",
+      "operation": {
+        "type": "custom-field-setdata",
+        "subscribeFieldOnErrorUid": "settings.extension_field",
+        "data": { "theme": "light", "size": "sm" }
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-G-002",
+      "name": "Custom Field setData: valid array → resolves, no onError",
+      "description": "Calls setData directly on location.CustomField.field with an array. Array form is accepted by Zod union(array, record).",
+      "operation": {
+        "type": "custom-field-setdata",
+        "subscribeFieldOnErrorUid": "settings.extension_field",
+        "data": ["option_a", "option_b"]
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-G-003",
+      "name": "Custom Field setData: null clearing → resolves, no onError",
+      "description": "Calls setData(null) on location.CustomField.field. Null clears the JSON extension field inside the group.",
+      "operation": {
+        "type": "custom-field-setdata",
+        "subscribeFieldOnErrorUid": "settings.extension_field",
+        "data": null
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-G-004",
+      "name": "Custom Field setData: string primitive → throws ValidationError",
+      "description": "Calls setData on location.CustomField.field with a string. String fails Zod union(array, record) for a JSON extension field.",
+      "operation": {
+        "type": "custom-field-setdata",
+        "subscribeFieldOnErrorUid": "settings.extension_field",
+        "data": "#0070f3"
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "extension_field",
+                "reasons": [
+                  {
+                    "message": "Expected a valid JSON value"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-G-005",
+      "name": "Custom Field setData: number → throws ValidationError INVALID_TYPE",
+      "description": "Calls setData on location.CustomField.field with a number. Number fails Zod union(array, record).",
+      "operation": {
+        "type": "custom-field-setdata",
+        "subscribeFieldOnErrorUid": "settings.extension_field",
+        "data": 42
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "extension_field",
+                "reasons": [
+                  {
+                    "reason": "INVALID_TYPE"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-G-006",
+      "name": "Custom Field setData: boolean → throws ValidationError INVALID_TYPE",
+      "description": "Calls setData on location.CustomField.field with a boolean. Boolean fails Zod union(array, record).",
+      "operation": {
+        "type": "custom-field-setdata",
+        "subscribeFieldOnErrorUid": "settings.extension_field",
+        "data": true
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "extension_field",
+                "reasons": [
+                  {
+                    "reason": "INVALID_TYPE"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    }
+  ],
+  "sdkDeUiLocation": "custom-field",
+  "sdkDeCustomFieldUid": "settings.extension_field",
+  "isExperimental": true
+}

@@ -98,7 +98,7 @@ export function useSdkTesting() {
     if (!appSdk) return null;
     
     return client({
-      adapter: appSdk.createAdapter(),
+      adapter: appSdk.createAdapter() as any,
       baseURL: `${appSdk.endpoints?.CMA}/v3`,
       headers: {
         'Content-Type': 'application/json',

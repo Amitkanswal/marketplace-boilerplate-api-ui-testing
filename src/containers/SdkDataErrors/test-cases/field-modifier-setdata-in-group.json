@@ -1,0 +1,254 @@
+{
+  "id": "field_modifier_setdata_in_group",
+  "name": "Field Modifier — Own Field setData (field inside Group)",
+  "description": "Tests calling setData directly via sdk.location.FieldModifierLocation.field when the field modifier is installed on a text field nested inside a group (settings.headline, min:5, max:100). The field modifier's field uid is the leaf uid 'headline'; the error detail fieldUid in failures is 'headline' (not the dotted path).",
+  "contentType": {
+    "uid": "sdk_tc_fm_group",
+    "title": "SDK TC FM - Field Modifier In Group",
+    "description": "Content type with a group containing a constrained text field for Field Modifier own-field setData tests",
+    "options": {
+      "is_page": false,
+      "singleton": false,
+      "title": "title"
+    },
+    "schema": [
+      {
+        "uid": "title",
+        "data_type": "text",
+        "display_name": "Title",
+        "mandatory": true,
+        "unique": false,
+        "field_metadata": {
+          "_default": true
+        },
+        "multiple": false
+      },
+      {
+        "uid": "settings",
+        "data_type": "group",
+        "display_name": "Settings",
+        "mandatory": false,
+        "unique": false,
+        "multiple": false,
+        "schema": [
+          {
+            "uid": "headline",
+            "data_type": "text",
+            "display_name": "Headline",
+            "mandatory": false,
+            "unique": false,
+            "field_metadata": {
+              "description": "5 to 100 characters — field modifier installed here"
+            },
+            "multiple": false,
+            "min": 5,
+            "max": 100
+          },
+          {
+            "uid": "sub_label",
+            "data_type": "text",
+            "display_name": "Sub Label",
+            "mandatory": false,
+            "unique": false,
+            "field_metadata": {},
+            "multiple": false
+          }
+        ]
+      }
+    ]
+  },
+  "baseline": {
+    "title": "SDK TC Field Modifier In Group Entry",
+    "settings": {
+      "headline": "Hello World",
+      "sub_label": null
+    }
+  },
+  "testCases": [
+    {
+      "id": "TC-FMG-001",
+      "name": "Field Modifier (in group) setData: valid string → resolves",
+      "description": "Calls setData on location.FieldModifierLocation.field (settings.headline, leaf uid 'headline') with a valid string ≥5 chars. Passes Zod and form validation.",
+      "operation": {
+        "type": "field-modifier-setdata",
+        "subscribeFieldOnErrorUid": "headline",
+        "data": "Breaking news headline here"
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-FMG-002",
+      "name": "Field Modifier (in group) setData: number → throws INVALID_TYPE",
+      "description": "Number fails Zod string schema for the nested text field. Error fieldUid is the leaf uid 'headline' (not the dotted path 'settings.headline') because the field modifier sends self:true with its own leaf uid.",
+      "operation": {
+        "type": "field-modifier-setdata",
+        "subscribeFieldOnErrorUid": "headline",
+        "data": 42
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "headline",
+                "reasons": [
+                  {
+                    "reason": "INVALID_TYPE"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-FMG-003",
+      "name": "Field Modifier (in group) setData: boolean → throws INVALID_TYPE",
+      "description": "Boolean fails Zod string schema for the nested text field. Error fieldUid is 'headline'.",
+      "operation": {
+        "type": "field-modifier-setdata",
+        "subscribeFieldOnErrorUid": "headline",
+        "data": true
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "headline",
+                "reasons": [
+                  {
+                    "reason": "INVALID_TYPE"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-FMG-004",
+      "name": "Field Modifier (in group) setData: string too short → resolves, onError fires",
+      "description": "'Hi' (2 chars) passes Zod (string type) but violates min_size:5 — form validation fires onError on both the field and entry listeners.",
+      "operation": {
+        "type": "field-modifier-setdata",
+        "subscribeFieldOnErrorUid": "settings.headline",
+        "data": "Hi"
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": true,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "settings.headline"
+              }
+            ]
+          }
+        },
+        "entryOnError": {
+          "fired": true,
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "settings.headline"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "TC-FMG-005",
+      "name": "Field Modifier (in group) setData: null clearing → resolves",
+      "description": "setData(null) clears the nested text field. Zod nullable allows it.",
+      "operation": {
+        "type": "field-modifier-setdata",
+        "subscribeFieldOnErrorUid": "settings.headline",
+        "data": null
+      },
+      "expected": {
+        "setData": {
+          "outcome": "resolved"
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    },
+    {
+      "id": "TC-FMG-006",
+      "name": "Field Modifier (in group) setData: object for text field → throws INVALID_TYPE",
+      "description": "Plain object fails Zod string schema for the nested text field.",
+      "operation": {
+        "type": "field-modifier-setdata",
+        "subscribeFieldOnErrorUid": "headline",
+        "data": { "text": "hello" }
+      },
+      "expected": {
+        "setData": {
+          "outcome": "threw-ValidationError",
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "details": [
+              {
+                "fieldUid": "headline",
+                "reasons": [
+                  {
+                    "reason": "INVALID_TYPE"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "fieldOnError": {
+          "fired": false
+        },
+        "entryOnError": {
+          "fired": false
+        }
+      }
+    }
+  ],
+  "sdkDeUiLocation": "field-modifier",
+  "sdkDeFieldModifierUid": "settings.headline",
+  "sdkDeFieldModifierTestId": "cs-edit-entry-field-settings_headline",
+  "isExperimental": true
+}

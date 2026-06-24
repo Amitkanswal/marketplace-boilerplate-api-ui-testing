@@ -38,7 +38,7 @@ export interface CombinedTestResult {
 }
 
 export interface TestCaseOperation {
-  type: 'field-setdata' | 'entry-setdata';
+  type: 'field-setdata' | 'entry-setdata' | 'custom-field-setdata' | 'field-modifier-setdata';
   targetFieldUid?: string;
   subscribeFieldOnErrorUid: string | null;
   data: unknown;
@@ -245,7 +245,11 @@ export async function executeTestCase(
 
   const subscribeUid = testCase.operation.subscribeFieldOnErrorUid;
   if (subscribeUid) {
-    const f = entry.getField(subscribeUid);
+    const f = testCase.operation.type === 'custom-field-setdata'
+      ? (sdk?.location?.CustomField?.field ?? null)
+      : testCase.operation.type === 'field-modifier-setdata'
+        ? (sdk?.location?.FieldModifierLocation?.field ?? null)
+        : entry.getField(subscribeUid);
     if (f) {
       let active = true;
       const fieldCb = (err: unknown) => {
@@ -298,6 +302,44 @@ export async function executeTestCase(
       const hydratedData = hydrate(testCase.operation.data);
       console.log(`[SDK-DE] → field.setData  field="${targetUid}"  data=`, hydratedData);
       await field.setData(hydratedData);
+    } else if (testCase.operation.type === 'custom-field-setdata') {
+      const cfField = sdk?.location?.CustomField?.field ?? null;
+      if (!cfField) {
+        console.warn('[SDK-DE] CustomField.field not available');
+        console.groupEnd();
+        cleanup.forEach(fn => fn());
+        return {
+          setData: {
+            outcome: 'field-not-found',
+            error: { name: 'Error', message: 'CustomField.field not available at current location', isValidationError: false },
+          },
+          fieldOnError: { fired: false, error: null },
+          entryOnError: { fired: false, error: null },
+          elapsedMs: Date.now() - startTime,
+        };
+      }
+      const hydratedData = hydrate(testCase.operation.data);
+      console.log('[SDK-DE] → location.CustomField.field.setData  data=', hydratedData);
+      await cfField.setData(hydratedData);
+    } else if (testCase.operation.type === 'field-modifier-setdata') {
+      const fmField = sdk?.location?.FieldModifierLocation?.field ?? null;
+      if (!fmField) {
+        console.warn('[SDK-DE] FieldModifierLocation.field not available');
+        console.groupEnd();
+        cleanup.forEach(fn => fn());
+        return {
+          setData: {
+            outcome: 'field-not-found',
+            error: { name: 'Error', message: 'FieldModifierLocation.field not available at current location', isValidationError: false },
+          },
+          fieldOnError: { fired: false, error: null },
+          entryOnError: { fired: false, error: null },
+          elapsedMs: Date.now() - startTime,
+        };
+      }
+      const hydratedData = hydrate(testCase.operation.data);
+      console.log('[SDK-DE] → location.FieldModifierLocation.field.setData  data=', hydratedData);
+      await fmField.setData(hydratedData);
     } else {
       const hydratedData = hydrate(testCase.operation.data) as Record<string, unknown>;
       console.log('[SDK-DE] → entry.setData  data=', hydratedData);
